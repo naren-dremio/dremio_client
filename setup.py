@@ -14,7 +14,10 @@ with open('HISTORY.rst') as history_file:
 requirements = [
     'pyarrow>=0.14.0',
     'pandas',
-    'Click>=6.0'
+    'Click>=6.0',
+    'requests>=2.21.0',
+    'protobuf',
+    'addict'
 ]
 
 setup_requirements = [ ]
@@ -42,18 +45,18 @@ setup(
     license="Apache Software License 2.0",
     long_description=readme + '\n\n' + history,
     include_package_data=True,
-    keywords='dremio_client',
-    name='dremio_client',
-    packages=find_packages(include=['dremio_client']),
+    keywords='pydremio',
+    name='pydremio',
+    packages=find_packages(include=['pydremio', "pydremio.flight", 'pydremio.auth']),
     setup_requires=setup_requirements,
     test_suite='tests',
     tests_require=test_requirements,
-    url='https://github.com/rymurr/dremio_client',
+    url='https://github.com/dremio-hub/pydremio',
     version='0.1.0',
     zip_safe=False,
     entry_points={
         'console_scripts': [
-            'dremio_client=dremio_client.cli:main',
+            'pydremio=pydremio.cli:main',
         ],
     },
 )

@@ -1,35 +1,65 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""Tests for `dremio_client` package."""
+"""Tests for `pydremio` package."""
 
 
 import pytest
+import json
 from click.testing import CliRunner
 
-from dremio_client import dremio_client
-from dremio_client import cli
+from pydremio.auth import basic_auth
+from pydremio.model.catalog import catalog
+from pydremio import cli
 
-@pytest.fixture
-def response():
-    """Sample pytest fixture.
-    See more at: http://doc.pytest.org/en/latest/fixture.html
-    """
-    # import requests
-    # return requests.get('https://github.com/audreyr/cookiecutter-pypackage')
-
-
-def test_content(response):
-    """Sample pytest test function with the pytest fixture as an argument."""
-    # from bs4 import BeautifulSoup
-    # assert 'GitHub' in BeautifulSoup(response.content).title.string
 
 def test_command_line_interface():
     """Test the CLI."""
     runner = CliRunner()
     result = runner.invoke(cli.main)
     assert result.exit_code == 0
-    assert 'dremio_client.cli.main' in result.output
+    assert 'pydremio.cli.main' in result.output
     help_result = runner.invoke(cli.main, ['--help'])
     assert help_result.exit_code == 0
     assert '--help  Show this message and exit.' in help_result.output
+
+
+def test_auth(requests_mock):
+    requests_mock.post('https://example.com/apiv2/login', text=json.dumps({'token': '12345'}))
+    token = basic_auth('https://example.com', 'foo', 'bar')
+    assert token == '12345'
+
+
+def test_catalog(requests_mock):
+    with open('tests/data/catalog.json', 'r+') as f:
+        txt = json.dumps(json.load(f))
+    requests_mock.get('https://example.com/api/v3/catalog', text=txt)
+    with open('tests/data/adls.json', 'r+') as f:
+        txt = json.dumps(json.load(f))
+    requests_mock.get('https://example.com/api/v3/catalog/1a2b82e3-08fc-43f7-a426-76bee4abaaef', text=txt)
+    with open('tests/data/nyctaxi.json', 'r+') as f:
+        txt = json.dumps(json.load(f))
+    requests_mock.get('https://example.com/api/v3/catalog/by-path/adls/nyctaxi', text=txt)
+
+    token = '12345'
+    c = catalog(token, 'https://example.com', lambda x: print(x))
+    assert 'adls' in dir(c)
+    assert 'nyctaxi' in dir(c.adls)
+    assert 'yellow_tripdata_2009_01_csv' in dir(c.adls.nyctaxi)
+
+
+def test_dataset(requests_mock):
+    with open('tests/data/catalog.json', 'r+') as f:
+        txt = json.dumps(json.load(f))
+    requests_mock.get('https://example.com/api/v3/catalog', text=txt)
+    with open('tests/data/adls.json', 'r+') as f:
+        txt = json.dumps(json.load(f))
+    requests_mock.get('https://example.com/api/v3/catalog/1a2b82e3-08fc-43f7-a426-76bee4abaaef', text=txt)
+    with open('tests/data/profiles.json', 'r+') as f:
+        txt = json.dumps(json.load(f))
+    requests_mock.get('https://example.com/api/v3/catalog/by-path/adls/profiles', text=txt)
+
+    token = '12345'
+    c = catalog(token, 'https://example.com', lambda x: x)
+    sql = c.adls.profiles.sql
+    assert sql('hello') == 'hello'

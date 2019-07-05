@@ -9,7 +9,7 @@ if "%SPHINXBUILD%" == "" (
 )
 set SOURCEDIR=.
 set BUILDDIR=_build
-set SPHINXPROJ=dremio_client
+set SPHINXPROJ=pydremio
 
 if "%1" == "" goto help
 

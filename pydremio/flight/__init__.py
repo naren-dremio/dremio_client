@@ -1,27 +1,8 @@
-# -*- coding: utf-8 -*-
 
-"""Main module."""
-from pyarrow import flight
-from pyarrow.compat import tobytes
-import pyarrow as pa
-import base64
 from .command_pb2 import Command
-
-class HttpDremioClientAuthHandler(flight.ClientAuthHandler):
-
-    def __init__(self, username, password):
-        super().__init__()
-        self.username = tobytes(username)
-        self.password = tobytes(password)
-        self.token = None
-
-    def authenticate(self, outgoing, incoming):
-        outgoing.write(base64.b64encode(self.username + b':' + self.password))
-        self.token = incoming.read()
-
-    def get_token(self):
-        return self.token
-
+from .flight_auth import HttpDremioClientAuthHandler
+import pyarrow as pa
+from pyarrow import flight
 
 def connect(hostname='localhost', port=47470, username='dremio', password='dremio123'):
     """
@@ -35,7 +16,7 @@ def connect(hostname='localhost', port=47470, username='dremio', password='dremi
     """
     c = flight.FlightClient.connect('grpc+tcp://{}:{}'.format(hostname, port))
     if username:
-        c.authenticate(HttpDremioClientAuthHandler(tobytes(username), tobytes(password if password else '')))
+        c.authenticate(HttpDremioClientAuthHandler(username, password if password else ''))
     return c
 
 
