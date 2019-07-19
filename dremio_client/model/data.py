@@ -1,4 +1,5 @@
 from .endpoints import catalog_item
+from ..util import refresh_metadata
 from addict import Dict
 
 
@@ -160,6 +161,9 @@ class Dataset(Catalog):
 
     def sql(self, sql):
         return self._flight_endpoint(sql)
+
+    def metadata_refresh(self):
+        refresh_metadata(self._token, self._base_url, ".".join(self.meta['path']))
 
 
 class PhysicalDataset(Dataset):

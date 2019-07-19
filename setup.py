@@ -17,7 +17,8 @@ requirements = [
     'Click>=6.0',
     'requests>=2.21.0',
     'protobuf',
-    'addict'
+    'addict',
+    'requests-futures'
 ]
 
 setup_requirements = [ ]
@@ -26,7 +27,7 @@ test_requirements = [ ]
 
 setup(
     author="Ryan Murray",
-    author_email='rymurr@dremio.com',
+    author_email='rymurr@gmail.com',
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
         'Intended Audience :: Developers',
@@ -45,18 +46,21 @@ setup(
     license="Apache Software License 2.0",
     long_description=readme + '\n\n' + history,
     include_package_data=True,
-    keywords='pydremio',
-    name='pydremio',
-    packages=find_packages(include=['pydremio', "pydremio.flight", 'pydremio.auth']),
+    keywords='dremio_client',
+    name='dremio_client',
+    packages=find_packages(include=['dremio_client', "dremio_client.flight", 'dremio_client.auth']),
     setup_requires=setup_requirements,
     test_suite='tests',
     tests_require=test_requirements,
-    url='https://github.com/dremio-hub/pydremio',
+    url='https://github.com/rymurr/dremio_client',
     version='0.1.0',
     zip_safe=False,
+    extras_require={
+        ':python_version == "2.7"': ['futures']
+    },
     entry_points={
         'console_scripts': [
-            'pydremio=pydremio.cli:main',
+            'dremio_client=dremio_client.cli:main',
         ],
     },
 )

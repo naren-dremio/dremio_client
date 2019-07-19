@@ -4,4 +4,4 @@ Usage
 
 To use Dremio client in a project::
 
-    import pydremio
+    import dremio_client

@@ -3,11 +3,11 @@ Dremio client
 =============
 
 
-.. image:: https://img.shields.io/pypi/v/pydremio.svg
-        :target: https://pypi.python.org/pypi/pydremio
+.. image:: https://img.shields.io/pypi/v/dremio_client.svg
+        :target: https://pypi.python.org/pypi/dremio_client
 
-.. image:: https://img.shields.io/travis/rymurr/pydremio.svg
-        :target: https://travis-ci.org/dremio-hub/pydremio
+.. image:: https://img.shields.io/travis/rymurr/dremio_client.svg
+        :target: https://travis-ci.org/rymurr/dremio_client
 
 .. image:: https://readthedocs.org/projects/dremio-client/badge/?version=latest
         :target: https://dremio-client.readthedocs.io/en/latest/?badge=latest
@@ -39,6 +39,11 @@ TODO
 * add reflections into catalog
 * test for larger spaces and ensure it doesnt fetch everytihgn if we hit directly
 * search
+* cli
+* docs
+* logging
+* map exceptions
+* add example to README
 
 Credits
 -------
