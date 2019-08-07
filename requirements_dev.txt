@@ -9,6 +9,6 @@ Sphinx==2.1.2
 twine==1.13.0
 click==7.0
 pytest==5.0.1
-pytest-runner==2.11.1
+pytest-runner==5.1
 requests-mock
 
