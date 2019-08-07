@@ -13,6 +13,9 @@ Dremio client
         :target: https://dremio-client.readthedocs.io/en/latest/?badge=latest
         :alt: Documentation Status
 
+.. image:: https://pyup.io/repos/github/rymurr/dremio_client/shield.svg
+     :target: https://pyup.io/repos/github/rymurr/dremio_client/
+     :alt: Updates
 
 
 
