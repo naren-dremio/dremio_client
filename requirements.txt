@@ -1,7 +1,7 @@
 pyarrow>=0.14.0
-pandas
+pandas==0.25.0
 Click>=6.0
 requests>=2.21.0
 protobuf==3.9.1
-addict
-requests-futures
+addict==2.2.1
+requests-futures==1.0.0
