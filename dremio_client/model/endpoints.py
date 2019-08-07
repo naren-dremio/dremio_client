@@ -2,7 +2,8 @@ import requests
 
 
 def _get_headers(token):
-    headers = {'Authorization': '_dremio{}'.format(token), 'content-type': 'application/json'}
+    headers = {'Authorization': '_dremio{}'.format(
+        token), 'content-type': 'application/json'}
     return headers
 
 
@@ -18,10 +19,15 @@ def catalog_item(token, base_url, id=None, path=None):
     :return: json of resource
     """
     if id is None and path is None:
-        raise TypeError("both id and path can't be None for a catalog_item call")
+        raise TypeError(
+            "both id and path can't be None for a catalog_item call")
 
-    endpoint = '/{}'.format(id) if id else '/by-path/{}'.format('/'.join(path).replace('"', ''))
-    r = requests.get(base_url + "/api/v3/catalog{}".format(endpoint), headers=_get_headers(token))
+    endpoint = '/{}'.format(id) if id else '/by-path/{}'.format(
+        '/'.join(path).replace('"', ''))
+    r = requests.get(
+        base_url +
+        "/api/v3/catalog{}".format(endpoint),
+        headers=_get_headers(token))
     r.raise_for_status()
     data = r.json()
     return data
@@ -49,10 +55,12 @@ def sql(token, base_url, query, context=None):
     :param context: optional dremio context
     :return: job id json object
     """
-    r = requests.post(base_url + '/api/v3/sql', headers=_get_headers(token), json={
-        'sql': query,
-        'context': context
-    })
+    r = requests.post(
+        base_url + '/api/v3/sql',
+        headers=_get_headers(token),
+        json={
+            'sql': query,
+            'context': context})
     r.raise_for_status()
     data = r.json()
     return data
@@ -67,7 +75,8 @@ def job_status(token, base_url, job_id):
     :param job_id: job id (as returned by sql)
     :return: status object
     """
-    r = requests.get(base_url + '/api/v3/job/{}'.format(job_id), headers=_get_headers(token))
+    r = requests.get(base_url + '/api/v3/job/{}'.format(job_id),
+                     headers=_get_headers(token))
     r.raise_for_status()
     data = r.json()
     return data
@@ -85,8 +94,13 @@ def job_results(token, base_url, job_id, offset=0, limit=100):
     :param limit: number of results to return (max 500)
     :return: result object
     """
-    r = requests.get(base_url + '/api/v3/job/{}/results?offset={}&limit={}'.format(job_id, offset, limit),
-                      headers=_get_headers(token))
+    r = requests.get(
+        base_url +
+        '/api/v3/job/{}/results?offset={}&limit={}'.format(
+            job_id,
+            offset,
+            limit),
+        headers=_get_headers(token))
     r.raise_for_status()
     data = r.json()
     return data

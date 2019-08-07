@@ -4,7 +4,8 @@ from addict import Dict
 
 
 def _clean(string):
-    return string.replace('"', '').replace(' ', '_').replace('-', '_').replace('@', '').replace('.', '_')
+    return string.replace('"', '').replace(' ', '_').replace(
+        '-', '_').replace('@', '').replace('.', '_')
 
 
 def get_path(item, trim_path):
@@ -31,7 +32,8 @@ def create(item, token, base_url, flight_endpoint, trim_path=0):
     else:
         if obj_type == 'DATASET':
             if dataset_type == 'PROMOTED':
-                return name, PhysicalDataset(token, base_url, flight_endpoint, **item)
+                return name, PhysicalDataset(
+                    token, base_url, flight_endpoint, **item)
         elif obj_type == 'FILE':
             return name, File(token, base_url, flight_endpoint, **item)
         if entity_type == 'source':
@@ -43,7 +45,8 @@ def create(item, token, base_url, flight_endpoint, trim_path=0):
 
 class Catalog(Dict):
 
-    def __init__(self, entity_type, token=None, base_url=None, flight_endpoint=None, id=None, tag=None):
+    def __init__(self, entity_type, token=None, base_url=None,
+                 flight_endpoint=None, id=None, tag=None):
         Dict.__init__(self)
         self._base_url = base_url
         self._token = token
@@ -62,13 +65,17 @@ class Catalog(Dict):
 
     def keys(self):
         keys = Dict.keys(self)
-        return [i for i in keys if i not in {'_catalog_item', '_base_url', '_token', '_flight_endpoint'}]
+        return [i for i in keys if i not in {
+            '_catalog_item', '_base_url', '_token', '_flight_endpoint'}]
 
     def __dir__(self):
         if len(self.keys()) == 1 and 'meta' in self.keys():
-            if self.meta['entity_type'] in {'source', 'home', 'space', 'folder', 'root'}:
-                result = self._catalog_item(self.meta['id'], self.meta.get('path', None))
-                name, obj = create(result, self._token, self._base_url, self._flight_endpoint)
+            if self.meta['entity_type'] in {
+                    'source', 'home', 'space', 'folder', 'root'}:
+                result = self._catalog_item(
+                    self.meta['id'], self.meta.get('path', None))
+                name, obj = create(result, self._token,
+                                   self._base_url, self._flight_endpoint)
                 self.update(obj)
                 return list(self.keys())
             # if self.meta.type == 'DATASET':
@@ -95,15 +102,19 @@ class Root(Catalog):
         Catalog.__init__(self, "root", token, base_url, flight_endpoint)
 
     def add(self, item):
-        name, obj = create(item, self._token, self._base_url, self._flight_endpoint)
+        name, obj = create(item, self._token, self._base_url,
+                           self._flight_endpoint)
         self[name] = obj
 
 
 class Space(Catalog):
 
-    def __init__(self, token=None, base_url=None, flight_endpoint=None, **kwargs):
-        Catalog.__init__(self, "space", token, base_url, flight_endpoint, kwargs.get('id', None),
-                         kwargs.get('tag', None))
+    def __init__(self, token=None, base_url=None,
+                 flight_endpoint=None, **kwargs):
+        Catalog.__init__(
+            self, "space", token, base_url, flight_endpoint, kwargs.get(
+                'id', None), kwargs.get(
+                'tag', None))
         self.meta['name'] = kwargs.get('name', None)
         for child in kwargs.get('children', list()):
             name, item = create(child, token, base_url, self._flight_endpoint,
@@ -113,14 +124,16 @@ class Space(Catalog):
 
 class Home(Space):
 
-    def __init__(self, token=None, base_url=None, flight_endpoint=None, **kwargs):
+    def __init__(self, token=None, base_url=None,
+                 flight_endpoint=None, **kwargs):
         Space.__init__(self, token, base_url, flight_endpoint, **kwargs)
         self.meta['entity_type'] = "home"
 
 
 class Folder(Space):
 
-    def __init__(self, token=None, base_url=None, flight_endpoint=None, **kwargs):
+    def __init__(self, token=None, base_url=None,
+                 flight_endpoint=None, **kwargs):
         Space.__init__(self, token, base_url, flight_endpoint, **kwargs)
         self.meta['entity_type'] = "folder"
         self.meta['path'] = kwargs.get('path', None)
@@ -128,33 +141,56 @@ class Folder(Space):
 
 class File(Space):
 
-    def __init__(self, token=None, base_url=None, flight_endpoint=None, **kwargs):
-        Catalog.__init__(self, "file", token, base_url, flight_endpoint, kwargs.get('id', None), None)
+    def __init__(self, token=None, base_url=None,
+                 flight_endpoint=None, **kwargs):
+        Catalog.__init__(self, "file", token, base_url,
+                         flight_endpoint, kwargs.get('id', None), None)
         self.meta['path'] = kwargs.get('path', None)
 
 
 class Source(Catalog):
-    def __init__(self, token=None, base_url=None, flight_endpoint=None, **kwargs):
-        Catalog.__init__(self, "source", token, base_url, flight_endpoint, kwargs.get('id', None),
-                         kwargs.get('tag', None))
+    def __init__(self, token=None, base_url=None,
+                 flight_endpoint=None, **kwargs):
+        Catalog.__init__(
+            self, "source", token, base_url, flight_endpoint, kwargs.get(
+                'id', None), kwargs.get(
+                'tag', None))
         for i in (
-                'path', 'type', 'config', 'createdAt', 'metadataPolicy', 'state', 'type', 'containerType', 'tag', 'id',
-                'accelerationGracePeriodMs', 'accelerationRefreshPeriodMs', 'accelerationNeverExpire',
+            'path',
+            'type',
+            'config',
+            'createdAt',
+            'metadataPolicy',
+            'state',
+            'type',
+            'containerType',
+            'tag',
+            'id',
+            'accelerationGracePeriodMs',
+            'accelerationRefreshPeriodMs',
+            'accelerationNeverExpire',
                 'accelerationNeverRefresh'):
             self.meta[i] = kwargs.get(i, None)
         path = self.meta.get('path', list())
         for child in kwargs.get('children', list()):
-            name, item = create(child, token, base_url, self._flight_endpoint, trim_path=(len(path) if path else 1))
+            name, item = create(
+                child, token, base_url, self._flight_endpoint, trim_path=(
+                    len(path) if path else 1))
             self[name] = item
 
 
 class Dataset(Catalog):
-    def __init__(self, dataset, token=None, base_url=None, flight_endpoint=None, **kwargs):
-        Catalog.__init__(self, dataset, token, base_url, flight_endpoint, kwargs.get('id', None),
-                         kwargs.get('tag', None))
-        for i in ('path', 'type', 'createdAt', 'format', 'approximateStatisticsAllowed'):
+    def __init__(self, dataset, token=None, base_url=None,
+                 flight_endpoint=None, **kwargs):
+        Catalog.__init__(
+            self, dataset, token, base_url, flight_endpoint, kwargs.get(
+                'id', None), kwargs.get(
+                'tag', None))
+        for i in ('path', 'type', 'createdAt', 'format',
+                  'approximateStatisticsAllowed'):
             self.meta[i] = kwargs.get(i, None)
-        self.acceleration = Dict(refresh_policy=kwargs.get('accelerationRefreshPolicy', None), accelerations=list())
+        self.acceleration = Dict(refresh_policy=kwargs.get(
+            'accelerationRefreshPolicy', None), accelerations=list())
 
     def query(self):
         return self.sql("select * from {}")
@@ -163,16 +199,21 @@ class Dataset(Catalog):
         return self._flight_endpoint(sql)
 
     def metadata_refresh(self):
-        refresh_metadata(self._token, self._base_url, ".".join(self.meta['path']))
+        refresh_metadata(self._token, self._base_url,
+                         ".".join(self.meta['path']))
 
 
 class PhysicalDataset(Dataset):
-    def __init__(self, token=None, base_url=None, flight_endpoint=None, **kwargs):
-        Dataset.__init__(self, "physical_dataset", token, base_url, flight_endpoint, **kwargs)
+    def __init__(self, token=None, base_url=None,
+                 flight_endpoint=None, **kwargs):
+        Dataset.__init__(self, "physical_dataset", token,
+                         base_url, flight_endpoint, **kwargs)
 
 
 class VirtualDataset(Dataset):
-    def __init__(self, token=None, base_url=None, flight_endpoint=None, **kwargs):
-        Dataset.__init__(self, "virtual_dataset", token, base_url, flight_endpoint, **kwargs)
+    def __init__(self, token=None, base_url=None,
+                 flight_endpoint=None, **kwargs):
+        Dataset.__init__(self, "virtual_dataset", token,
+                         base_url, flight_endpoint, **kwargs)
         self.sql = kwargs.get('sql', None)
         self.sqlContext = kwargs.get('sqlContext', None)

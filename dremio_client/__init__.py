@@ -14,7 +14,8 @@ from .model.endpoints import catalog, catalog_item, sql, job_results, job_status
 from .auth import basic_auth
 
 
-def connect(hostname, username=None, password=None, tls=True, port=None, flight_port=47470, auth='basic'):
+def connect(hostname, username=None, password=None, tls=True,
+            port=None, flight_port=47470, auth='basic'):
     """
     Create a Dremio Client instance. This currently only supports basic auth from the constructor.
     Will be extended for oauth, token auth and storing auth on disk or in stores in the future
@@ -24,10 +25,12 @@ def connect(hostname, username=None, password=None, tls=True, port=None, flight_
     :param password: password
     :param auth: always basic
     """
-    return DremioClient(hostname, username, password, tls, port, flight_port, auth)
+    return DremioClient(hostname, username, password,
+                        tls, port, flight_port, auth)
 
 
-__all__ = ['connect', 'catalog', 'catalog_item', 'basic_auth', 'sql', 'job_status', 'job_results']
+__all__ = ['connect', 'catalog', 'catalog_item',
+           'basic_auth', 'sql', 'job_status', 'job_results']
 
 # https://github.com/ipython/ipython/issues/11653
 # autocomplete doesn't work when using jedi so turn it off!
