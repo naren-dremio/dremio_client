@@ -4,4 +4,4 @@ Click>=6.0
 requests>=2.21.0
 protobuf
 addict==2.2.1
-requests-futures
+requests-futures==1.0.0
