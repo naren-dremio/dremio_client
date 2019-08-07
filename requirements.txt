@@ -3,5 +3,5 @@ pandas
 Click>=6.0
 requests>=2.21.0
 protobuf
-addict
+addict==2.2.1
 requests-futures
