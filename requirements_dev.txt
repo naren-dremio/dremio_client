@@ -10,5 +10,5 @@ twine==1.13.0
 click==7.0
 pytest==5.0.1
 pytest-runner==5.1
-requests-mock
+requests-mock==1.6.0
 
