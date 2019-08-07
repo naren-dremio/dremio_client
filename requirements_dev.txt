@@ -1,4 +1,4 @@
-pip==18.1
+pip==19.2.1
 bumpversion==0.5.3
 wheel==0.32.1
 watchdog==0.9.0
@@ -10,5 +10,5 @@ twine==1.12.1
 click==6.7
 pytest==3.4.2
 pytest-runner==2.11.1
-requests-mock
+requests-mock==1.6.0
 

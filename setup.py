@@ -48,7 +48,7 @@ setup(
     include_package_data=True,
     keywords='dremio_client',
     name='dremio_client',
-    packages=find_packages(include=['dremio_client', "dremio_client.flight", 'dremio_client.auth']),
+    packages=find_packages(include=['dremio_client', "dremio_client.flight", 'dremio_client.auth', 'dremio_client.model', 'dremio_client.util']),
     setup_requires=setup_requirements,
     test_suite='tests',
     tests_require=test_requirements,
