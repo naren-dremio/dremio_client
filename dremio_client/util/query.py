@@ -1,9 +1,7 @@
 import time
-import sys
 from concurrent.futures.thread import ThreadPoolExecutor
 
 from ..model.endpoints import job_results, job_status, sql
-from six import reraise as _raise
 
 executor = ThreadPoolExecutor(max_workers=8)
 

@@ -17,12 +17,12 @@ try:
         :param password: Password on Dremio
         :return: arrow flight client
         """
-        c = flight.FlightClient.connect('grpc+tcp://{}:{}'.format(hostname, port))
+        c = flight.FlightClient.connect(
+            'grpc+tcp://{}:{}'.format(hostname, port))
         if username:
             c.authenticate(HttpDremioClientAuthHandler(
                 username, password if password else ''))
         return c
-
 
     def query(sql, client=None, hostname='localhost', port=47470,
               username='dremio', password='dremio123', pandas=True):

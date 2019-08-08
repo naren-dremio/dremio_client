@@ -17,13 +17,13 @@ requirements = [
     'Click>=6.0',
     'requests>=2.21.0',
     'protobuf',
-    'addict',
-    'requests-futures'
+    'requests-futures',
+    'confuse'
 ]
 
-setup_requirements = [ ]
+setup_requirements = []
 
-test_requirements = [ ]
+test_requirements = []
 
 setup(
     author="Ryan Murray",
@@ -41,14 +41,16 @@ setup(
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
     ],
-    description="Apache Flight client for Dremio",
+    description="Python client for Dremio. See https://dremio.com",
     install_requires=requirements,
     license="Apache Software License 2.0",
     long_description=readme + '\n\n' + history,
     include_package_data=True,
     keywords='dremio_client',
     name='dremio_client',
-    packages=find_packages(include=['dremio_client', "dremio_client.flight", 'dremio_client.auth', 'dremio_client.model', 'dremio_client.util']),
+    packages=find_packages(
+        include=['dremio_client', "dremio_client.flight", 'dremio_client.auth', 'dremio_client.model',
+                 'dremio_client.util', 'dremio_client.conf']),
     setup_requires=setup_requirements,
     test_suite='tests',
     tests_require=test_requirements,
@@ -60,7 +62,7 @@ setup(
     },
     entry_points={
         'console_scripts': [
-            'dremio_client=dremio_client.cli:main',
+            'dremio_client=dremio_client.cli:cli',
         ],
     },
 )

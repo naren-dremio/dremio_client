@@ -1,6 +1,5 @@
 from .endpoints import catalog_item
 from ..util import refresh_metadata
-from addict import Dict
 
 
 def _clean(string):
@@ -43,11 +42,11 @@ def create(item, token, base_url, flight_endpoint, trim_path=0):
     raise KeyError("unsupported type")
 
 
-class Catalog(Dict):
+class Catalog(dict):
 
     def __init__(self, entity_type, token=None, base_url=None,
                  flight_endpoint=None, id=None, tag=None):
-        Dict.__init__(self)
+        dict.__init__(self)
         self._base_url = base_url
         self._token = token
         self._flight_endpoint = flight_endpoint
@@ -64,7 +63,7 @@ class Catalog(Dict):
         self._catalog_item = try_id_and_path
 
     def keys(self):
-        keys = Dict.keys(self)
+        keys = dict.keys(self)
         return [i for i in keys if i not in {
             '_catalog_item', '_base_url', '_token', '_flight_endpoint'}]
 
@@ -85,7 +84,7 @@ class Catalog(Dict):
 
     def __getattr__(self, item):
         try:
-            value = Dict.__getattr__(self, item)
+            value = dict.__getitem__(self, item)
             if value is None:
                 raise KeyError()
             if isinstance(value, Catalog) and value['_base_url'] is None:
@@ -93,7 +92,7 @@ class Catalog(Dict):
             return value
         except KeyError:
             self.__dir__()
-            return Dict.__getattr__(self, item)
+            return dict.__getitem__(self, item)
 
 
 class Root(Catalog):
@@ -189,7 +188,7 @@ class Dataset(Catalog):
         for i in ('path', 'type', 'createdAt', 'format',
                   'approximateStatisticsAllowed'):
             self.meta[i] = kwargs.get(i, None)
-        self.acceleration = Dict(refresh_policy=kwargs.get(
+        self.acceleration = dict(refresh_policy=kwargs.get(
             'accelerationRefreshPolicy', None), accelerations=list())
 
     def query(self):

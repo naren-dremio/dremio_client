@@ -11,7 +11,6 @@ __version__ = '0.1.0'
 
 from .dremio_client import DremioClient
 from .model.endpoints import catalog, catalog_item, sql, job_results, job_status
-from .auth import basic_auth
 
 
 def connect(hostname, username=None, password=None, tls=True,
@@ -29,8 +28,7 @@ def connect(hostname, username=None, password=None, tls=True,
                         tls, port, flight_port, auth)
 
 
-__all__ = ['connect', 'catalog', 'catalog_item',
-           'basic_auth', 'sql', 'job_status', 'job_results']
+__all__ = ['connect', 'catalog', 'catalog_item', 'sql', 'job_status', 'job_results']
 
 # https://github.com/ipython/ipython/issues/11653
 # autocomplete doesn't work when using jedi so turn it off!

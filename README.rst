@@ -45,7 +45,6 @@ TODO
 * put, delete and post for catalog entries
 * collaborations handled correctly
 * refresh
-* alter to refresh metadata
 * add reflections into catalog
 * test for larger spaces and ensure it doesnt fetch everytihgn if we hit directly
 * search
