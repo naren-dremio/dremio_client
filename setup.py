@@ -18,7 +18,8 @@ requirements = [
     'requests>=2.21.0',
     'protobuf',
     'requests-futures',
-    'confuse'
+    'confuse',
+    'simplejson'
 ]
 
 setup_requirements = []

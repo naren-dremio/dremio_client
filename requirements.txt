@@ -5,3 +5,4 @@ requests>=2.21.0
 protobuf==3.9.1
 requests-futures==1.0.0
 confuse
+simplejson

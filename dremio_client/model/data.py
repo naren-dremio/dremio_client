@@ -1,5 +1,47 @@
+from collections import namedtuple
+import simplejson as json
+
 from .endpoints import catalog_item
 from ..util import refresh_metadata
+
+
+DatasetMetaData = namedtuple('DatasetMetaData', ['entityType',
+                                                 'id',
+                                                 'path',
+                                                 'tag',
+                                                 'type',
+                                                 'fields',
+                                                 'createdAt',
+                                                 'accelerationRefreshPolicy',
+                                                 'sql',
+                                                 'sqlContext',
+                                                 'format',
+                                                 'approximateStatisticsAllowed'])
+SpaceMetaData = namedtuple('SpaceMetaData', ['entityType', 'id', 'name', 'tag'])
+FolderMetaData = namedtuple('FolderMetaData', ['entityType', 'id', 'path', 'tag'])
+FileMetaData = namedtuple('FileMetaData', ['entityType', 'id', 'path'])
+SourceState = namedtuple('SourceState', ['status', 'message'])
+MetadataPolicy = namedtuple('MetadataPolicy', ['authTTLMs',
+                                               'datasetRefreshAfterMs',
+                                               'datasetExpireAfterMs',
+                                               'namesRefreshMs',
+                                               'datasetUpdateMode'])
+SourceMetadata = namedtuple('SourceMetadata', ['entityType',
+                                               'id',
+                                               'name',
+                                               'description',
+                                               'tag',
+                                               'type',
+                                               'config',
+                                               'createdAt',
+                                               'metadataPolicy',
+                                               'state',
+                                               'accelerationGracePeriodMs',
+                                               'accelerationRefreshPeriodMs',
+                                               'accelerationNeverExpire',
+                                               'accelerationNeverRefresh',
+                                               'path'
+                                               ])
 
 
 def _clean(string):
@@ -44,15 +86,11 @@ def create(item, token, base_url, flight_endpoint, trim_path=0):
 
 class Catalog(dict):
 
-    def __init__(self, entity_type, token=None, base_url=None,
-                 flight_endpoint=None, id=None, tag=None):
+    def __init__(self, token=None, base_url=None, flight_endpoint=None):
         dict.__init__(self)
         self._base_url = base_url
         self._token = token
         self._flight_endpoint = flight_endpoint
-        self['meta'] = {'entity_type': entity_type,
-                        'id': id,
-                        'tag': tag}
 
         def try_id_and_path(x, y):
             try:
@@ -67,20 +105,32 @@ class Catalog(dict):
         return [i for i in keys if i not in {
             '_catalog_item', '_base_url', '_token', '_flight_endpoint'}]
 
+    def commit(self):
+        s = self.to_json()
+        # todo do put here!
+
     def __dir__(self):
-        if len(self.keys()) == 1 and 'meta' in self.keys():
-            if self.meta['entity_type'] in {
-                    'source', 'home', 'space', 'folder', 'root'}:
-                result = self._catalog_item(
-                    self.meta['id'], self.meta.get('path', None))
+        if len(self.keys()) == 0 and 'meta' in self.__dict__:
+            if self.meta.entityType in {'source', 'home', 'space', 'folder', 'root'}:
+                result = self._catalog_item(self.meta.id if hasattr(self.meta, 'id') else None,
+                                            self.meta.path if hasattr(self.meta, 'path') else None)
                 name, obj = create(result, self._token,
                                    self._base_url, self._flight_endpoint)
                 self.update(obj)
                 return list(self.keys())
-            # if self.meta.type == 'DATASET':
-            #     self.query = lambda : query("select * from {}", None)
-            #     self.sql = lambda s: query(s, None)
         return list(self.keys())
+
+    def to_json(self):
+        result = self.meta._asdict()
+        children = list()
+        for child in self.keys():
+            try:
+                children.append(child.to_json())
+            except:
+                pass
+        if len(children) > 1:
+            result['children'] = children
+        return json.dumps(result)
 
     def __getattr__(self, item):
         try:
@@ -98,7 +148,7 @@ class Catalog(dict):
 class Root(Catalog):
 
     def __init__(self, token=None, base_url=None, flight_endpoint=None):
-        Catalog.__init__(self, "root", token, base_url, flight_endpoint)
+        Catalog.__init__(self, token, base_url, flight_endpoint)
 
     def add(self, item):
         name, obj = create(item, self._token, self._base_url,
@@ -110,11 +160,13 @@ class Space(Catalog):
 
     def __init__(self, token=None, base_url=None,
                  flight_endpoint=None, **kwargs):
-        Catalog.__init__(
-            self, "space", token, base_url, flight_endpoint, kwargs.get(
-                'id', None), kwargs.get(
-                'tag', None))
-        self.meta['name'] = kwargs.get('name', None)
+        Catalog.__init__(self, token, base_url, flight_endpoint)
+        self.meta = SpaceMetaData(
+            entityType='space',
+            id=kwargs.get('id', None),
+            tag=kwargs.get('tag', None),
+            name=kwargs.get('name', None)
+        )
         for child in kwargs.get('children', list()):
             name, item = create(child, token, base_url, self._flight_endpoint,
                                 trim_path=len(kwargs.get('path', list())))
@@ -126,51 +178,92 @@ class Home(Space):
     def __init__(self, token=None, base_url=None,
                  flight_endpoint=None, **kwargs):
         Space.__init__(self, token, base_url, flight_endpoint, **kwargs)
-        self.meta['entity_type'] = "home"
+        self.meta = self.meta._replace(entityType='home')
 
 
-class Folder(Space):
-
-    def __init__(self, token=None, base_url=None,
-                 flight_endpoint=None, **kwargs):
-        Space.__init__(self, token, base_url, flight_endpoint, **kwargs)
-        self.meta['entity_type'] = "folder"
-        self.meta['path'] = kwargs.get('path', None)
-
-
-class File(Space):
+class Folder(Catalog):
 
     def __init__(self, token=None, base_url=None,
                  flight_endpoint=None, **kwargs):
-        Catalog.__init__(self, "file", token, base_url,
-                         flight_endpoint, kwargs.get('id', None), None)
-        self.meta['path'] = kwargs.get('path', None)
+        Catalog.__init__(self, token, base_url, flight_endpoint)
+        self.meta = FolderMetaData(
+            entityType='folder',
+            id=kwargs.get('id', None),
+            tag=kwargs.get('tag', None),
+            path=kwargs.get('path', None)
+        )
+        for child in kwargs.get('children', list()):
+            name, item = create(child, token, base_url, self._flight_endpoint,
+                                trim_path=len(kwargs.get('path', list())))
+            self[name] = item
+
+class File(Catalog):
+
+    def __init__(self, token=None, base_url=None,
+                 flight_endpoint=None, **kwargs):
+        Catalog.__init__(self, token, base_url, flight_endpoint)
+        self.meta = FileMetaData(
+            entityType='file',
+            id=kwargs.get('id', None),
+            path=kwargs.get('path', None)
+        )
+
+
+def _get_source_type(source_type):
+    return source_type  # todo may do more with this at some point
+
+
+def _get_source_config(config):
+    return config  # todo these should be turned into source specific objects. Will do at some stage
+
+
+def _get_metadata_policy(metadata_policy):
+    if not metadata_policy:
+        return None
+    return MetadataPolicy(
+        authTTLMs=metadata_policy.get('authTTLMs'),
+        datasetRefreshAfterMs=metadata_policy.get('datasetRefreshAfterMs'),
+        datasetExpireAfterMs=metadata_policy.get('datasetExpireAfterMs'),
+        namesRefreshMs=metadata_policy.get('namesRefreshMs'),
+        datasetUpdateMode=metadata_policy.get('datasetUpdateMode')
+    )
+
+
+def _get_source_state(state):
+    if not state:
+        return None
+    return SourceState(
+        status=state.get('status'),
+        message=state.get('message')
+    )
+
+
+def _get_source_meta(kwargs):
+    return SourceMetadata(
+        entityType="source",
+        id=kwargs.get('id'),
+        name=kwargs.get('name'),
+        description=kwargs.get('description'),
+        tag=kwargs.get('tag'),
+        type=_get_source_type(kwargs.get('type')),
+        config=_get_source_config(kwargs.get('config')),
+        createdAt=kwargs.get('createdAt'),
+        metadataPolicy=_get_metadata_policy(kwargs.get('metadataPolicy')),
+        state=_get_source_state(kwargs.get('state')),
+        accelerationGracePeriodMs=kwargs.get('accelerationGracePeriodMs'),
+        accelerationRefreshPeriodMs=kwargs.get('accelerationRefreshPeriodMs'),
+        accelerationNeverExpire=kwargs.get('accelerationNeverExpire'),
+        accelerationNeverRefresh=kwargs.get('accelerationNeverRefresh'),
+        path=kwargs.get('path')
+    )
 
 
 class Source(Catalog):
     def __init__(self, token=None, base_url=None,
                  flight_endpoint=None, **kwargs):
-        Catalog.__init__(
-            self, "source", token, base_url, flight_endpoint, kwargs.get(
-                'id', None), kwargs.get(
-                'tag', None))
-        for i in (
-            'path',
-            'type',
-            'config',
-            'createdAt',
-            'metadataPolicy',
-            'state',
-            'type',
-            'containerType',
-            'tag',
-            'id',
-            'accelerationGracePeriodMs',
-            'accelerationRefreshPeriodMs',
-            'accelerationNeverExpire',
-                'accelerationNeverRefresh'):
-            self.meta[i] = kwargs.get(i, None)
-        path = self.meta.get('path', list())
+        Catalog.__init__(self, token, base_url, flight_endpoint)
+        self.meta = _get_source_meta(kwargs)
+        path = self.meta.path
         for child in kwargs.get('children', list()):
             name, item = create(
                 child, token, base_url, self._flight_endpoint, trim_path=(
@@ -179,17 +272,23 @@ class Source(Catalog):
 
 
 class Dataset(Catalog):
-    def __init__(self, dataset, token=None, base_url=None,
+    def __init__(self, token=None, base_url=None,
                  flight_endpoint=None, **kwargs):
-        Catalog.__init__(
-            self, dataset, token, base_url, flight_endpoint, kwargs.get(
-                'id', None), kwargs.get(
-                'tag', None))
-        for i in ('path', 'type', 'createdAt', 'format',
-                  'approximateStatisticsAllowed'):
-            self.meta[i] = kwargs.get(i, None)
-        self.acceleration = dict(refresh_policy=kwargs.get(
-            'accelerationRefreshPolicy', None), accelerations=list())
+        Catalog.__init__(self, token, base_url, flight_endpoint)
+        self.meta = DatasetMetaData(
+            entityType='dataset',
+            id=kwargs.get('id'),
+            path=kwargs.get('path'),
+            tag=kwargs.get('tag'),
+            type=kwargs.get('type'),
+            fields=kwargs.get('fields'),
+            createdAt=kwargs.get('path'),
+            accelerationRefreshPolicy=kwargs.get('path'),
+            sql=kwargs.get('sql'),
+            sqlContext=kwargs.get('sqlContext'),
+            format=kwargs.get('format'),
+            approximateStatisticsAllowed=kwargs.get('approximateStatisticsAllowed')
+        )
 
     def query(self):
         return self.sql("select * from {}")
@@ -199,20 +298,16 @@ class Dataset(Catalog):
 
     def metadata_refresh(self):
         refresh_metadata(self._token, self._base_url,
-                         ".".join(self.meta['path']))
+                         ".".join(self.meta.path))
 
 
 class PhysicalDataset(Dataset):
     def __init__(self, token=None, base_url=None,
                  flight_endpoint=None, **kwargs):
-        Dataset.__init__(self, "physical_dataset", token,
-                         base_url, flight_endpoint, **kwargs)
+        Dataset.__init__(self, token, base_url, flight_endpoint, **kwargs)
 
 
 class VirtualDataset(Dataset):
     def __init__(self, token=None, base_url=None,
                  flight_endpoint=None, **kwargs):
-        Dataset.__init__(self, "virtual_dataset", token,
-                         base_url, flight_endpoint, **kwargs)
-        self.sql = kwargs.get('sql', None)
-        self.sqlContext = kwargs.get('sqlContext', None)
+        Dataset.__init__(self, token, base_url, flight_endpoint, **kwargs)
