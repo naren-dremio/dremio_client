@@ -21,6 +21,9 @@ Dremio client
      :target: https://app.codacy.com/project/rymurr/dremio_client/dashboard
      :alt: Codacy
 
+.. image:: https://img.shields.io/codecov/c/github/rymurr/dremio_client
+     :target: https://codecov.io/gh/rymurr/dremio_client
+     :alt: Codecov
 
 
 Apache Flight client for Dremio
