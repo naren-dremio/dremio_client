@@ -7,6 +7,8 @@ python:
   - 3.5
   - 2.7
 
+env:
+  - CODECOV_TOKEN=bebb1336-846a-4e5a-a511-b3b6faa0f99b
 # Command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
 install: pip install -U tox-travis
 
