@@ -17,6 +17,10 @@ Dremio client
      :target: https://pyup.io/repos/github/rymurr/dremio_client/
      :alt: Updates
 
+.. image:: https://img.shields.io/codacy/grade/78c83e3484634e32b17496e0dbe7ade5
+     :target: https://app.codacy.com/project/rymurr/dremio_client/dashboard
+     :alt: Codacy
+
 
 
 Apache Flight client for Dremio
