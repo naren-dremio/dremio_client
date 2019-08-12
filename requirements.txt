@@ -4,5 +4,5 @@ Click>=6.0
 requests>=2.21.0
 protobuf==3.9.1
 requests-futures==1.0.0
+simplejson==3.16.0
 confuse==1.0.0
-simplejson
