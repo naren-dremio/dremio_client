@@ -26,7 +26,7 @@ def run(token, base_url, query):
             row_count = state.get('rowCount', 0)
             break
         if state['jobState'] in {'CANCELED', 'FAILED'}:
-            raise ValueError("job failed " + state)
+            raise ValueError("job failed " + str(state))
         time.sleep(10)
     count = 0
     while count < row_count:

@@ -28,7 +28,7 @@ class DremioClient(object):
         self._password = password
         self._token = basic_auth(self._base_url, username, password)
         self._catalog = catalog(
-            self._token, self._base_url, lambda sql: self.query(sql))
+            self._token, self._base_url, self.query)
 
     @property
     def data(self):

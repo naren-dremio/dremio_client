@@ -17,7 +17,7 @@ DatasetMetaData = namedtuple('DatasetMetaData', ['entityType',
                                                  'sqlContext',
                                                  'format',
                                                  'approximateStatisticsAllowed'])
-SpaceMetaData = namedtuple('SpaceMetaData', ['entityType', 'id', 'name', 'tag'])
+SpaceMetaData = namedtuple('SpaceMetaData', ['entityType', 'id', 'name', 'tag', 'path'])
 FolderMetaData = namedtuple('FolderMetaData', ['entityType', 'id', 'path', 'tag'])
 FileMetaData = namedtuple('FileMetaData', ['entityType', 'id', 'path'])
 SourceState = namedtuple('SourceState', ['status', 'message'])
@@ -73,14 +73,19 @@ def create(item, token, base_url, flight_endpoint, trim_path=0):
     else:
         if obj_type == 'DATASET':
             if dataset_type == 'PROMOTED':
-                return name, PhysicalDataset(
-                    token, base_url, flight_endpoint, **item)
+                return name, PhysicalDataset(token, base_url, flight_endpoint, **item)
+            else:
+                return name, VirtualDataset(token, base_url, flight_endpoint, **item)
         elif obj_type == 'FILE':
             return name, File(token, base_url, flight_endpoint, **item)
         if entity_type == 'source':
             return name, Source(token, base_url, flight_endpoint, **item)
         elif entity_type == 'folder':
             return name, Folder(token, base_url, flight_endpoint, **item)
+        elif entity_type == 'home':
+            return name, Home(token, base_url, flight_endpoint, **item)
+        elif entity_type == 'space':
+            return name, Space(token, base_url, flight_endpoint, **item)
     raise KeyError("unsupported type")
 
 
@@ -109,6 +114,10 @@ class Catalog(dict):
         s = self.to_json()
         # todo do put here!
 
+    def get(self):
+        dir(self)
+        return self
+
     def __dir__(self):
         if len(self.keys()) == 0 and 'meta' in self.__dict__:
             if self.meta.entityType in {'source', 'home', 'space', 'folder', 'root'}:
@@ -117,6 +126,7 @@ class Catalog(dict):
                 name, obj = create(result, self._token,
                                    self._base_url, self._flight_endpoint)
                 self.update(obj)
+                self.meta = self.meta._replace(**{k: v for k, v in obj.meta._asdict().items() if v})
                 return list(self.keys())
         return list(self.keys())
 
@@ -163,9 +173,10 @@ class Space(Catalog):
         Catalog.__init__(self, token, base_url, flight_endpoint)
         self.meta = SpaceMetaData(
             entityType='space',
-            id=kwargs.get('id', None),
-            tag=kwargs.get('tag', None),
-            name=kwargs.get('name', None)
+            id=kwargs.get('id'),
+            tag=kwargs.get('tag'),
+            name=kwargs.get('name'),
+            path=kwargs.get('path')
         )
         for child in kwargs.get('children', list()):
             name, item = create(child, token, base_url, self._flight_endpoint,
@@ -196,6 +207,7 @@ class Folder(Catalog):
             name, item = create(child, token, base_url, self._flight_endpoint,
                                 trim_path=len(kwargs.get('path', list())))
             self[name] = item
+
 
 class File(Catalog):
 

@@ -3,15 +3,26 @@ from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import division
 
-"""Top-level package for Dremio client."""
 
 __author__ = """Ryan Murray"""
 __email__ = 'rymurr@gmail.com'
 __version__ = '0.1.0'
 
+import os
 from .dremio_client import DremioClient
+from .conf import build_config
 from .model.endpoints import catalog, catalog_item, sql, job_results, job_status
 
+
+def init(config_dir=None):
+    if config_dir:
+        os.environ['DREMIO_CLIENTDIR'] = config_dir
+    config = build_config()
+    return connect(config['hostname'].get(),
+                   config['auth']['username'].get(),
+                   config['auth']['password'].get(),
+                   config['ssl'].get(bool),
+                   config['port'].get(int))
 
 def connect(hostname, username=None, password=None, tls=True,
             port=None, flight_port=47470, auth='basic'):
@@ -28,7 +39,7 @@ def connect(hostname, username=None, password=None, tls=True,
                         tls, port, flight_port, auth)
 
 
-__all__ = ['connect', 'catalog', 'catalog_item', 'sql', 'job_status', 'job_results']
+__all__ = ['init', 'connect', 'catalog', 'catalog_item', 'sql', 'job_status', 'job_results']
 
 # https://github.com/ipython/ipython/issues/11653
 # autocomplete doesn't work when using jedi so turn it off!

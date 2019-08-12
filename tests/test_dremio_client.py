@@ -3,10 +3,8 @@
 from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import division
-"""Tests for `dremio_client` package."""
 
 
-import pytest
 import json
 from click.testing import CliRunner
 
@@ -54,7 +52,7 @@ def test_catalog(requests_mock):
     requests_mock.get('https://example.com/api/v3/catalog/by-path/adls/nyctaxi', text=txt)
 
     token = '12345'
-    c = catalog(token, 'https://example.com', lambda x: print(x))
+    c = catalog(token, 'https://example.com', print)
     assert 'adls' in dir(c)
     assert 'nyctaxi' in dir(c.adls)
     assert 'yellow_tripdata_2009_01_csv' in dir(c.adls.nyctaxi)

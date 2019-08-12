@@ -50,7 +50,7 @@ try:
         batches = []
         while True:
             try:
-                batch, metadata = reader.read_chunk()
+                batch, _ = reader.read_chunk()
                 batches.append(batch)
             except StopIteration:
                 break
