@@ -157,3 +157,18 @@ def _raise_for_status(self):
         return HTTPError(http_error_msg, response=self), self.status_code, reason
     else:
         return None, self.status_code, reason
+
+
+def reflections(token, base_url):
+    """
+    fetch all reflections
+    https://docs.dremio.com/rest-api/reflections/get-reflection.html
+
+    :param token: auth token
+    :param base_url: sql query
+    :return: result object
+    """
+    r = requests.get(base_url + "/api/v3/reflection", headers=_get_headers(token))
+    r.raise_for_status()
+    data = r.json()
+    return data
