@@ -1,31 +1,21 @@
-# Config file for automatic testing at travis-ci.org
-
 language: python
 python:
-  - 3.7
-  - 3.6
-  - 3.5
-  - 2.7
-
+- 3.7
+- 3.6
+- 3.5
+- 2.7
 env:
-  - CODECOV_TOKEN=bebb1336-846a-4e5a-a511-b3b6faa0f99b
-# Command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
+- CODECOV_TOKEN=bebb1336-846a-4e5a-a511-b3b6faa0f99b
 install: pip install -U tox-travis
-
-# Command to run tests, e.g. python setup.py test
 script: tox
-
-# Assuming you have installed the travis-ci CLI tool, after you
-# create the Github repo and add it to Travis, run the
-# following command to finish PyPI deployment setup:
-# $ travis encrypt --add deploy.password
 deploy:
   provider: pypi
   distributions: sdist bdist_wheel
   user: rymurr
   password:
-    secure: oO2Jq6du21eDMWJILW2I7v5xg/5MuNYayCoBbZjf7aA7dEel+VugY1BLAbiYcbubFJ3C39zGl3/NXsZDbPt1gtA+QLvxHBwDeUVPZSoAF+vKDqvnNgebt95VA47lkGcIHx620JfSIQmJMdkApaozmhuGCINytRIxQJ98iIG7eo+YXLe3jJqMZO17DiEDCY+IAP1ylMmww+xAsGQPIRvz01ZgPp0VNmaptwHWRHWfmp4uBwLAQg1+jl2+CFGHl3Y8mwYcFwXtbGL+m5upDqwov9YRmZdOexS4+ehL5KS02kewjSEQ7Y1oLPn2Pr9IolsN5LRM7j6njE8wHCr3C1zlVkFiBaDBUh/e9clv4WNUnfrLXiDbMlzavpByft5ZqjVybEH5U5lrD89/7Ad6G7LL1V20Lq3omRzsbjeVgS8DcMEMGwUte/NQ2x8rUya1dHnZiX2pfWYq2wQkxTap0PULARkMW9Uxf1Jt3dd5JSwnreS9m3lM5YtYNsrjVAvgT79ayqLRksCPsuxUBdJ7mIpoYG/+zqZ/kklDyrPxsoGzcwdS9Y+xovwqxh9nAi1cnPPFVrfDDLyTU3CtuKGcOsRSB2K5blNSd8HcL60E8l2S4LkUc/sF+BE5ZjOYy0Ue1dIzPEeHHFinHFpilJ9X03kWdfKWPH5O9w3lXiyZaaU+Ces=
+    secure: pk/5Mk2Gh/A1n/TcvGsArxOO8D11cbAfPfATxuRV/gJyhgPiQZ/r6kIgnGOitixp2SJ4G6bxlDBR50/UxZqtJF7AJcOW30E+dakUNNml1JJMoyqV/fa0wvzahv6Ti9Icvs4RUHjPIX8mgQsuGMl3MUrYSz/Eres8OFk3D+Nxma00LnjUZU5xd0SVKoW3ya+QEYbFLqWdF9KDMWzEYsinaEv/g4t9yUbqGclWvqNWGSZtvmGMdajVW5wXdhKrupOvI9pVAnD5ogWpRx16NGV9dk1dCPI1Yx+/cMVkeKJzK30UOLGV13RKr7cz9vZloUVeKWxqd/B165TI2kuI8w2HLgXwxYOk8mKuQg8qHemtk7Jz6cjYzFIg2DxSeSkPpu2HJBIBhYxW/j+5TImsm0ftOjIwxP2VV/+hHkPLNwK+0LyD/VCK2aBwsYblL8a5zWZObtVSP9P43zjXRYfaj4XBtTklGSTGxrCP2LXiSYRrlYtiXPO8ZkJre23gb4JedwfPnHry/8cMB98B6N86slqjkR18nE56LUx7wQsMjaVomLo5g4Pe+ipPfyPcdswHpHFKS3Wa8mstZtjLZappj7bdEJZ1KNU+SEoWzwsikXAMSZDhXaNsNVCJhrU23D6zT71V8Grdgj1zFofhYYv0ocxA8yT3j/kWYbSXwT7jf9XUMrE=
+  skip_existing: true
+  skip_cleanup: true
   on:
     tags: true
     repo: rymurr/dremio_client
-    python: 3.7
