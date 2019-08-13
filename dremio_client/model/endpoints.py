@@ -22,12 +22,30 @@
 # under the License.
 #
 import requests
+from requests.exceptions import HTTPError
+from ..error import DremioUnauthorizedException, DremioNotFoundException, DremioPermissionException, DremioException
 
 
 def _get_headers(token):
     headers = {'Authorization': '_dremio{}'.format(
         token), 'content-type': 'application/json'}
     return headers
+
+
+def _get(url, token, details=''):
+    r = requests.get(url, headers=_get_headers(token))
+    error, code, _ = _raise_for_status(r)
+    if not error:
+        data = r.json()
+        return data
+
+    if code == 401:
+        raise DremioUnauthorizedException("Unauthorized on /api/v3/catalog " + details, error)
+    if code == 403:
+        raise DremioPermissionException("Not permissioned to view entity at " + details, error)
+    if code == 404:
+        raise DremioNotFoundException("No entity exists at " + details, error)
+    raise DremioException('unknown error', error)
 
 
 def catalog_item(token, base_url, id=None, path=None):
@@ -44,16 +62,10 @@ def catalog_item(token, base_url, id=None, path=None):
     if id is None and path is None:
         raise TypeError(
             "both id and path can't be None for a catalog_item call")
-
+    idpath = (id if id else '') + ', ' + ('.'.join(path) if path else '')
     endpoint = '/{}'.format(id) if id else '/by-path/{}'.format(
         '/'.join(path).replace('"', ''))
-    r = requests.get(
-        base_url +
-        "/api/v3/catalog{}".format(endpoint),
-        headers=_get_headers(token))
-    r.raise_for_status()
-    data = r.json()
-    return data
+    return _get(base_url + "/api/v3/catalog{}".format(endpoint), token, idpath)
 
 
 def catalog(token, base_url):
@@ -63,10 +75,7 @@ def catalog(token, base_url):
     :param base_url: base Dremio url
     :return: json of root resource
     """
-    r = requests.get(base_url + "/api/v3/catalog", headers=_get_headers(token))
-    r.raise_for_status()
-    data = r.json()
-    return data
+    return _get(base_url + "/api/v3/catalog", token)
 
 
 def sql(token, base_url, query, context=None):
@@ -84,9 +93,13 @@ def sql(token, base_url, query, context=None):
         json={
             'sql': query,
             'context': context})
-    r.raise_for_status()
-    data = r.json()
-    return data
+    error, code, _ = _raise_for_status(r)
+    if not error:
+        data = r.json()
+        return data
+    if code == 401:
+        raise DremioUnauthorizedException("Unauthorized on /api/v3/catalog", error)
+    raise DremioException('unknown error', error)
 
 
 def job_status(token, base_url, job_id):
@@ -98,11 +111,7 @@ def job_status(token, base_url, job_id):
     :param job_id: job id (as returned by sql)
     :return: status object
     """
-    r = requests.get(base_url + '/api/v3/job/{}'.format(job_id),
-                     headers=_get_headers(token))
-    r.raise_for_status()
-    data = r.json()
-    return data
+    return _get(base_url + '/api/v3/job/{}'.format(job_id), token)
 
 
 def job_results(token, base_url, job_id, offset=0, limit=100):
@@ -117,13 +126,34 @@ def job_results(token, base_url, job_id, offset=0, limit=100):
     :param limit: number of results to return (max 500)
     :return: result object
     """
-    r = requests.get(
+    return _get(
         base_url +
         '/api/v3/job/{}/results?offset={}&limit={}'.format(
             job_id,
             offset,
             limit),
-        headers=_get_headers(token))
-    r.raise_for_status()
-    data = r.json()
-    return data
+        token)
+
+
+def _raise_for_status(self):
+    """Raises stored :class:`HTTPError`, if one occurred. Copy from requests request.raise_for_status()"""
+
+    http_error_msg = ''
+    if isinstance(self.reason, bytes):
+        try:
+            reason = self.reason.decode('utf-8')
+        except UnicodeDecodeError:
+            reason = self.reason.decode('iso-8859-1')
+    else:
+        reason = self.reason
+
+    if 400 <= self.status_code < 500:
+        http_error_msg = u'%s Client Error: %s for url: %s' % (self.status_code, reason, self.url)
+
+    elif 500 <= self.status_code < 600:
+        http_error_msg = u'%s Server Error: %s for url: %s' % (self.status_code, reason, self.url)
+
+    if http_error_msg:
+        return HTTPError(http_error_msg, response=self), self.status_code, reason
+    else:
+        return None, self.status_code, reason

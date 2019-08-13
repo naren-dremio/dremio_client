@@ -134,7 +134,8 @@ class Catalog(dict):
             '_catalog_item', '_base_url', '_token', '_flight_endpoint'}]
 
     def commit(self):
-        s = self.to_json()
+        pass
+        # s = self.to_json()
         # todo do put here!
 
     def get(self):
@@ -159,7 +160,7 @@ class Catalog(dict):
         for child in self.keys():
             try:
                 children.append(child.to_json())
-            except:
+            except:  # NOQA
                 pass
         if len(children) > 1:
             result['children'] = children

@@ -38,7 +38,7 @@ from .model.endpoints import catalog_item as _catalog_item
 
 
 @click.group()
-@click.option('--config', type=click.Path(exists=True, dir_okay=False),
+@click.option('--config', type=click.Path(exists=True, dir_okay=True, file_okay=False),
               help='Custom config file.')
 @click.option('-h', '--hostname', help='Hostname if different from config file')
 @click.option('-p', '--port', type=int, help='Hostname if different from config file')
@@ -49,11 +49,17 @@ from .model.endpoints import catalog_item as _catalog_item
 def cli(ctx, config, hostname, port, ssl, username, password):
     if config:
         os.environ['DREMIO_CLIENTDIR'] = config
-    ctx.obj = {'hostname': hostname,
-               'port': port,
-               'ssl': ssl,
-               'auth.username': username,
-               'auth.password': password}
+    ctx.obj = dict()
+    if hostname:
+        ctx.obj['hostname'] = hostname
+    if port:
+        ctx.obj['port'] = port
+    if ssl:
+        ctx.obj['ssl'] = ssl
+    if username:
+        ctx.obj['auth.username'] = username
+    if password:
+        ctx.obj['auth.password'] = password
 
 
 @cli.command()
@@ -66,8 +72,8 @@ def query(args, sql):
     base_url, token = get_base_url_token(args)
     results = list()
     for x in run(token, base_url, sql):
-        results.append(x)
-    click.echo(x)
+        results.extend(x['rows'])
+    click.echo(results)
 
 
 @cli.command()

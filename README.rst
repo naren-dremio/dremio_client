@@ -92,11 +92,8 @@ TODO
 * add reflections into catalog
 * test for larger spaces and ensure it doesnt fetch everytihgn if we hit directly
 * search
-* cli
 * docs
 * logging
-* map exceptions
-* add example to README
 
 Credits
 -------

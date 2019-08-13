@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #
 # Copyright (c) 2019 Ryan Murray.
 #
@@ -21,20 +22,24 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-from .config_parser import build_config
-from ..auth import auth
-from confuse import NotFoundError
 
 
-def get_base_url_token(args=None):
-    config = build_config(args)
-    ssl = 's' if config['ssl'].get(bool) else ''
-    host = config['hostname'].get()
-    port = ":" + str(config['port'].get(int))
-    base_url = 'http{}://{}{}'.format(ssl, host, port)
-    try:
-        timeout = config['auth']['timeout'].get(int)
-    except NotFoundError:
-        timeout = 10
-    token = auth(base_url, config, timeout)
-    return base_url, token
+class DremioException(Exception):
+    """
+    base dremio exception
+    """
+    def __init__(self, msg, original_exception):
+        super(DremioException, self).__init__(msg + (": %s" % original_exception))
+        self.original_exception = original_exception
+
+
+class DremioUnauthorizedException(DremioException):
+    pass
+
+
+class DremioPermissionException(DremioException):
+    pass
+
+
+class DremioNotFoundException(DremioException):
+    pass
