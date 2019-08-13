@@ -123,7 +123,7 @@ class Catalog(dict):
         def try_id_and_path(x, y):
             try:
                 return catalog_item(token, base_url, x)
-            except Exception:
+            except Exception as e:
                 return catalog_item(token, base_url, path=y)
 
         self._catalog_item = try_id_and_path
