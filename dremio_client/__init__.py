@@ -6,7 +6,7 @@ from __future__ import division
 
 __author__ = """Ryan Murray"""
 __email__ = 'rymurr@gmail.com'
-__version__ = '0.2.3'
+__version__ = '0.2.4'
 
 import os
 from .dremio_client import DremioClient
