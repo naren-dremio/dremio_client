@@ -26,7 +26,6 @@ from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import division
 
-import requests
 import pytest
 from dremio_client.model.endpoints import catalog, catalog_item, sql, job_results, job_status
 from dremio_client.error import DremioUnauthorizedException, DremioPermissionException, DremioNotFoundException

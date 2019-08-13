@@ -22,10 +22,7 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-from requests.exceptions import HTTPError
-
 from .auth import basic_auth
-from .error import DremioException
 from .model.endpoints import catalog, job_results, job_status, sql, catalog_item
 
 
@@ -44,8 +41,7 @@ class SimpleClient(object):
         """
         self._hostname = hostname
         self._flight_port = flight_port
-        self._base_url = ('https' if tls else 'http') + '://' + \
-                         hostname + (':{}'.format(port) if port else '')
+        self._base_url = ('https' if tls else 'http') + '://' + hostname + (':{}'.format(port) if port else '')
         self._username = username
         self._password = password
         self._token = basic_auth(self._base_url, username, password)

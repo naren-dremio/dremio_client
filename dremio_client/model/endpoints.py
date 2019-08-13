@@ -34,7 +34,7 @@ def _get_headers(token):
 
 def _get(url, token, details=''):
     r = requests.get(url, headers=_get_headers(token))
-    error, code, reason = _raise_for_status(r)
+    error, code, _ = _raise_for_status(r)
     if not error:
         data = r.json()
         return data
@@ -67,6 +67,7 @@ def catalog_item(token, base_url, id=None, path=None):
         '/'.join(path).replace('"', ''))
     return _get(base_url + "/api/v3/catalog{}".format(endpoint), token, idpath)
 
+
 def catalog(token, base_url):
     """
     https://docs.dremio.com/rest-api/catalog/get-catalog.html populate the root dremio catalog
@@ -75,6 +76,7 @@ def catalog(token, base_url):
     :return: json of root resource
     """
     return _get(base_url + "/api/v3/catalog", token)
+
 
 def sql(token, base_url, query, context=None):
     """
@@ -91,7 +93,7 @@ def sql(token, base_url, query, context=None):
         json={
             'sql': query,
             'context': context})
-    error, code, reason = _raise_for_status(r)
+    error, code, _ = _raise_for_status(r)
     if not error:
         data = r.json()
         return data

@@ -51,7 +51,7 @@ def test_command_line_interface(requests_mock):
     runner = CliRunner()
     result = runner.invoke(cli.query, ['--sql', 'select * from sys.options'], obj={}, catch_exceptions=False)
     assert result.exit_code == 0
-    assert "'name': 'acceleration.orphan.cleanup_in_milliseconds'" in result.output
+    assert "'acceleration.orphan.cleanup_in_milliseconds" in result.output
     help_result = runner.invoke(cli.query, ['--help'])
     assert help_result.exit_code == 0
     assert 'execute a query given by sql and print results' in help_result.output

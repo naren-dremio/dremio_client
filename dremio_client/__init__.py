@@ -47,6 +47,7 @@ def init(config_dir=None):
                    config['ssl'].get(bool),
                    config['port'].get(int))
 
+
 def connect(hostname, username=None, password=None, tls=True,
             port=None, flight_port=47470, auth='basic'):
     """
