@@ -25,7 +25,8 @@ deploy:
   user: rymurr
   password:
     secure: oO2Jq6du21eDMWJILW2I7v5xg/5MuNYayCoBbZjf7aA7dEel+VugY1BLAbiYcbubFJ3C39zGl3/NXsZDbPt1gtA+QLvxHBwDeUVPZSoAF+vKDqvnNgebt95VA47lkGcIHx620JfSIQmJMdkApaozmhuGCINytRIxQJ98iIG7eo+YXLe3jJqMZO17DiEDCY+IAP1ylMmww+xAsGQPIRvz01ZgPp0VNmaptwHWRHWfmp4uBwLAQg1+jl2+CFGHl3Y8mwYcFwXtbGL+m5upDqwov9YRmZdOexS4+ehL5KS02kewjSEQ7Y1oLPn2Pr9IolsN5LRM7j6njE8wHCr3C1zlVkFiBaDBUh/e9clv4WNUnfrLXiDbMlzavpByft5ZqjVybEH5U5lrD89/7Ad6G7LL1V20Lq3omRzsbjeVgS8DcMEMGwUte/NQ2x8rUya1dHnZiX2pfWYq2wQkxTap0PULARkMW9Uxf1Jt3dd5JSwnreS9m3lM5YtYNsrjVAvgT79ayqLRksCPsuxUBdJ7mIpoYG/+zqZ/kklDyrPxsoGzcwdS9Y+xovwqxh9nAi1cnPPFVrfDDLyTU3CtuKGcOsRSB2K5blNSd8HcL60E8l2S4LkUc/sF+BE5ZjOYy0Ue1dIzPEeHHFinHFpilJ9X03kWdfKWPH5O9w3lXiyZaaU+Ces=
+  skip_existing: true
+  skip_cleanup: true
   on:
     tags: true
     repo: rymurr/dremio_client
-    python: 3.7
