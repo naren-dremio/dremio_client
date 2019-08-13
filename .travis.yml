@@ -1,30 +1,19 @@
-# Config file for automatic testing at travis-ci.org
-
 language: python
 python:
-  - 3.7
-  - 3.6
-  - 3.5
-  - 2.7
-
+- 3.7
+- 3.6
+- 3.5
+- 2.7
 env:
-  - CODECOV_TOKEN=bebb1336-846a-4e5a-a511-b3b6faa0f99b
-# Command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
+- CODECOV_TOKEN=bebb1336-846a-4e5a-a511-b3b6faa0f99b
 install: pip install -U tox-travis
-
-# Command to run tests, e.g. python setup.py test
 script: tox
-
-# Assuming you have installed the travis-ci CLI tool, after you
-# create the Github repo and add it to Travis, run the
-# following command to finish PyPI deployment setup:
-# $ travis encrypt --add deploy.password
 deploy:
   provider: pypi
   distributions: sdist bdist_wheel
   user: rymurr
   password:
-    secure: P2OBQs6xz0my6pkdUMK3jVlLetA8L8kEe2m/O7NmA9NSN3MprIxJTOCx6lQ8LHDnWjbY3PoH/MwaLNLNcHywXy0HLw8LlCkVm3gqDuaaikRGAk2eU2UDQUkWURs+OyZ4aCpzgbOf1d0E5eDuV84vhfzXyRguttzmUNPp1c1fQwAoAy0Kno34eSi6oefykAYrES2Ten6GVyCd0VAg56aRQ0KGj9S/MFAjxn8PIhRWTwIOOvF7FRBywbUPzOCY6YGeqB8gS0eLxyJ+p8OpEuD4XL2wyi2XzD7ku95D69x+R9fEQP0be+z2tY7Z/RyoeXPryRaxx3YAAtU3cqC5Ao/uY6lM9j16FTVsHXZWbFGnA22CAtjjbJb2M6JFQPQC9qBoEHyr2pl1R4AOa/+TV/5CfO214epZ7cepYS/HejfuYIOmHpdG/8BnIzbrsoTK5IXxS3I5yEqzU5q6FuSVoB0x2+bS4wXucHS5mmersMt14WQ2JRyTqCgHnkaKrwgcaFiZg3Qfp6Vs3SyySFVvz8i0vsSNLPkmTYjVKT87ACovHqPIt8ZXh5FH2jLT8EZw1ZrbWSrOfqhRF5g+BkHZZZMf91MW0d0M81gk2z17tMpyMOtdwAwqAgsXaRDZGMOb4sVtW6aK2G/3q0omIL4BKFvcya+PoL7DqYGPMWR14PkEwcM=
+    secure: pqqiB6qMfrzc2v9zrIN9KY+FjANU2dY1dzrg9cK1mAcuWw2WjON8tCpRrqufLsVY2QoPshB8nW8g7D1/hpB9jzdOJeSIN/BJTGCYz294D+HVT8fpy33240ims5Lioeay/gHIKYtth5SFEYdizcC8d7TSWmm/TaGICWnRg61O2rwpSQLWnxtZ8SD7rO/ayKIbGdR4grfU9PQTMSXlkRqH+iOpCvNKcJ/URTwKK4KhydvPAYTVSCJ8txcgNmA7oDiMP9NVBeZLAbUeZU513cIdHjRDR+6WfT/P6xRGhHcakR2heDaXSaK3L9pC478IqnfsxZKpR+Mkbg+o8D+NwFXKAuKjxZaE4ZpL+DgEjX2OD7Jp42hmG7GnpN/99JWVlhl7Wagg2Njvvlqka68K1mI8i2euNeEeHXVKFPXVuR+a8ky9GH/Nmnhtycd3i4GmTrMYlG15fudmVAvs2RkKBd9kTUoer+JXIzGAHiX4dY6tt+8ZKovR1Kab20FFF119gtFOOwG3dbkgMlSPjfA1JpgYxn7ZXnOy1clEfO2tRqL7QuYB1w+1ES8+WTtnPpu99XZRvKB/UgjYfsJy+y24j4e8FXccD7kENwe6js/q1JLsxN9pU1ZZEj7NrCKVe5xYHOUf7Gna5bdO5vhmmkUW8KmbJ4nQH7E+Ncp+hDVGVHszDmA=
   skip_existing: true
   skip_cleanup: true
   on:
