@@ -24,9 +24,99 @@
 from collections import namedtuple
 import simplejson as json
 
-from .endpoints import catalog_item
+from .endpoints import catalog_item, collaboration_tags, collaboration_wiki
 from ..util import refresh_metadata
 
+
+class VoteMetadata(namedtuple('VoteMetadata', [
+    "id",
+    "votes",
+    "datasetId",  # todo link to dataset
+    "datasetPath",  # todo link to dataset
+    "datasetType",
+    "datasetReflectionCount",
+    "entityType"
+])):
+    def to_json(self):
+        return json.dumps(self._asdict())
+
+
+class QueueMetadata(namedtuple('QueueMetadata', [
+    "id",
+    "tag",
+    "name",
+    "cpuTier",
+    "maxAllowedRunningJobs",
+    "maxStartTimeoutMs"
+])):
+    def to_json(self):
+        return json.dumps(self._asdict())
+
+
+class RuleMetadata(namedtuple('RuleMetadata', [
+    "name",
+    "conditions",
+    "acceptId",
+    "acceptName",
+    "action",
+    "id"
+])):
+    def to_json(self):
+        return json.dumps(self._asdict())
+
+
+class ReflectionSummaryMetadata(namedtuple('ReflectionSummaryMetadata', ["entityType",
+                                                                         "id",
+                                                                         "createdAt",
+                                                                         "updatedAt",
+                                                                         "type",
+                                                                         "name",
+                                                                         "datasetId",
+                                                                         "datasetPath",
+                                                                         "datasetType",
+                                                                         "currentSizeBytes",
+                                                                         "totalSizeBytes",
+                                                                         "enabled",
+                                                                         "status",
+                                                                         ])):
+    def to_json(self):
+        return json.dumps(self._asdict())
+
+
+class ReflectionMetadata(namedtuple('ReflectionMetadata', ["entityType",
+                                                           "id",
+                                                           "tag",
+                                                           "name",
+                                                           "enabled",
+                                                           "createdAt",
+                                                           "updatedAt",
+                                                           "type",
+                                                           "datasetId",
+                                                           "currentSizeBytes",
+                                                           "totalSizeBytes",
+                                                           "status",
+                                                           "dimensionFields",
+                                                           "measureFields",
+                                                           "displayFields",
+                                                           "distributionFields",
+                                                           "partitionFields",
+                                                           "sortFields",
+                                                           "partitionDistributionStrategy"
+                                                           ])):
+    def to_json(self):
+        return json.dumps(self._asdict())
+
+
+WikiData = namedtuple('WikiData', ['text', 'version'])
+TagsData = namedtuple('TagsData', ['tags', 'version'])
+MetadataPolicy = namedtuple('MetadataPolicy', ['authTTLMs',
+                                               'datasetRefreshAfterMs',
+                                               'datasetExpireAfterMs',
+                                               'namesRefreshMs',
+                                               'datasetUpdateMode'])
+AccessControl = namedtuple('AccessControl', ['id', 'permission'])
+AccessControlList = namedtuple('AccessControlList', ['users', 'groups', 'version'])
+SourceState = namedtuple('SourceState', ['status', 'message'])
 
 DatasetMetaData = namedtuple('DatasetMetaData', ['entityType',
                                                  'id',
@@ -39,16 +129,11 @@ DatasetMetaData = namedtuple('DatasetMetaData', ['entityType',
                                                  'sql',
                                                  'sqlContext',
                                                  'format',
-                                                 'approximateStatisticsAllowed'])
-SpaceMetaData = namedtuple('SpaceMetaData', ['entityType', 'id', 'name', 'tag', 'path'])
-FolderMetaData = namedtuple('FolderMetaData', ['entityType', 'id', 'path', 'tag'])
-FileMetaData = namedtuple('FileMetaData', ['entityType', 'id', 'path'])
-SourceState = namedtuple('SourceState', ['status', 'message'])
-MetadataPolicy = namedtuple('MetadataPolicy', ['authTTLMs',
-                                               'datasetRefreshAfterMs',
-                                               'datasetExpireAfterMs',
-                                               'namesRefreshMs',
-                                               'datasetUpdateMode'])
+                                                 'approximateStatisticsAllowed',
+                                                 'accessControlList'])
+SpaceMetaData = namedtuple('SpaceMetaData', ['entityType', 'id', 'name', 'tag', 'path', 'accessControlList'])
+FolderMetaData = namedtuple('FolderMetaData', ['entityType', 'id', 'path', 'tag', 'accessControlList'])
+FileMetaData = namedtuple('FileMetaData', ['entityType', 'id', 'path', 'accessControlList'])
 SourceMetadata = namedtuple('SourceMetadata', ['entityType',
                                                'id',
                                                'name',
@@ -63,7 +148,8 @@ SourceMetadata = namedtuple('SourceMetadata', ['entityType',
                                                'accelerationRefreshPeriodMs',
                                                'accelerationNeverExpire',
                                                'accelerationNeverRefresh',
-                                               'path'
+                                               'path',
+                                               'accessControlList'
                                                ])
 
 
@@ -178,6 +264,14 @@ class Catalog(dict):
             self.__dir__()
             return dict.__getitem__(self, item)
 
+    def wiki(self):
+        result = collaboration_wiki(self._token, self._base_url, self.meta['id'])
+        return make_wiki(result)
+
+    def tags(self):
+        result = collaboration_tags(self._token, self._base_url, self.meta['id'])
+        return make_tags(result)
+
 
 class Root(Catalog):
 
@@ -190,6 +284,22 @@ class Root(Catalog):
         self[name] = obj
 
 
+def _get_acl(acl):
+    if not acl:
+        return
+    return [AccessControl(ac.get('id'), ac.get('permission')) for ac in acl]
+
+
+def _get_acls(acl):
+    if not acl:
+        return
+    return AccessControlList(
+        users=_get_acl(acl.get('users')),
+        groups=_get_acl(acl.get('groups')),
+        version=acl.get('version')
+    )
+
+
 class Space(Catalog):
 
     def __init__(self, token=None, base_url=None,
@@ -200,7 +310,8 @@ class Space(Catalog):
             id=kwargs.get('id'),
             tag=kwargs.get('tag'),
             name=kwargs.get('name'),
-            path=kwargs.get('path')
+            path=kwargs.get('path'),
+            accessControlList=_get_acls(kwargs.get('accessControlList'))
         )
         for child in kwargs.get('children', list()):
             name, item = create(child, token, base_url, self._flight_endpoint,
@@ -225,7 +336,8 @@ class Folder(Catalog):
             entityType='folder',
             id=kwargs.get('id', None),
             tag=kwargs.get('tag', None),
-            path=kwargs.get('path', None)
+            path=kwargs.get('path', None),
+            accessControlList=_get_acls(kwargs.get('accessControlList'))
         )
         for child in kwargs.get('children', list()):
             name, item = create(child, token, base_url, self._flight_endpoint,
@@ -241,7 +353,8 @@ class File(Catalog):
         self.meta = FileMetaData(
             entityType='file',
             id=kwargs.get('id', None),
-            path=kwargs.get('path', None)
+            path=kwargs.get('path', None),
+            accessControlList=_get_acls(kwargs.get('accessControlList'))
         )
 
 
@@ -290,7 +403,8 @@ def _get_source_meta(kwargs):
         accelerationRefreshPeriodMs=kwargs.get('accelerationRefreshPeriodMs'),
         accelerationNeverExpire=kwargs.get('accelerationNeverExpire'),
         accelerationNeverRefresh=kwargs.get('accelerationNeverRefresh'),
-        path=kwargs.get('path')
+        path=kwargs.get('path'),
+        accessControlList=_get_acls(kwargs.get('accessControlList'))
     )
 
 
@@ -323,7 +437,8 @@ class Dataset(Catalog):
             sql=kwargs.get('sql'),
             sqlContext=kwargs.get('sqlContext'),
             format=kwargs.get('format'),
-            approximateStatisticsAllowed=kwargs.get('approximateStatisticsAllowed')
+            approximateStatisticsAllowed=kwargs.get('approximateStatisticsAllowed'),
+            accessControlList=_get_acls(kwargs.get('accessControlList'))
         )
 
     def query(self):
@@ -347,3 +462,85 @@ class VirtualDataset(Dataset):
     def __init__(self, token=None, base_url=None,
                  flight_endpoint=None, **kwargs):
         Dataset.__init__(self, token, base_url, flight_endpoint, **kwargs)
+
+
+def make_reflection(data, summary=False):
+    if summary:
+        return ReflectionSummaryMetadata(
+            entityType="reflection-summary",
+            id=data.get("id"),
+            createdAt=data.get("createdAt"),
+            updatedAt=data.get("updatedAt"),
+            type=data.get("type"),
+            name=data.get("name"),
+            datasetId=data.get("datasetId"),
+            datasetPath=data.get("datasetPath"),
+            datasetType=data.get("datasetType"),
+            currentSizeBytes=data.get("currentSizeBytes"),
+            totalSizeBytes=data.get("totalSizeBytes"),
+            enabled=data.get("enabled"),
+            status=data.get("status"),
+        )
+    return ReflectionMetadata(
+        entityType="reflection",
+        id=data.get("id"),
+        tag=data.get("tag"),
+        name=data.get("name"),
+        enabled=data.get("enabled"),
+        createdAt=data.get("createdAt"),
+        updatedAt=data.get("updatedAt"),
+        type=data.get("type"),
+        datasetId=data.get("datasetId"),  # todo link to dataset
+        currentSizeBytes=data.get("currentSizeBytes"),
+        totalSizeBytes=data.get("totalSizeBytes"),
+        status=data.get("status"),  # todo object
+        dimensionFields=data.get("dimensionFields"),  # todo object
+        measureFields=data.get("measureFields"),  # todo object
+        displayFields=data.get("displayFields"),  # todo object
+        distributionFields=data.get("distributionFields"),  # todo object
+        partitionFields=data.get("partitionFields"),  # todo object
+        sortFields=data.get("sortFields"),  # todo object
+        partitionDistributionStrategy=data.get("partitionDistributionStrategy"),
+    )
+
+
+def make_tags(tags):
+    return TagsData(tags=tags.get('tags'), version=tags.get('version'))
+
+
+def make_wiki(wiki):
+    return WikiData(text=wiki.get('text'), version=wiki.get('version'))
+
+
+def make_wlm_rule(rule):
+    return RuleMetadata(
+        id=rule.get("id"),
+        conditions=rule.get("conditions"),
+        name=rule.get("name"),
+        acceptId=rule.get("acceptId"),
+        acceptName=rule.get("acceptName"),
+        action=rule.get("action")
+    )
+
+
+def make_wlm_queue(queue):
+    return QueueMetadata(
+        id=queue.get("id"),
+        tag=queue.get("tag"),
+        name=queue.get("name"),
+        cpuTier=queue.get("cpuTier"),
+        maxAllowedRunningJobs=queue.get("maxAllowedRunningJobs"),
+        maxStartTimeoutMs=queue.get("maxStartTimeoutMs")
+    )
+
+
+def make_vote(vote):
+    return VoteMetadata(
+        id=vote.get("id"),
+        votes=vote.get("votes"),
+        datasetId=vote.get("datasetId"),
+        datasetPath=vote.get("datasetPath"),
+        datasetType=vote.get("datasetType"),
+        datasetReflectionCount=vote.get("datasetReflectionCount"),
+        entityType="vote-summary"
+    )

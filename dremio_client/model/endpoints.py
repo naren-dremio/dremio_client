@@ -23,7 +23,8 @@
 #
 import requests
 from requests.exceptions import HTTPError
-from ..error import DremioUnauthorizedException, DremioNotFoundException, DremioPermissionException, DremioException
+from ..error import DremioUnauthorizedException, DremioNotFoundException, DremioPermissionException, DremioException, \
+    DremioBadRequestException
 
 
 def _get_headers(token):
@@ -39,8 +40,10 @@ def _get(url, token, details=''):
         data = r.json()
         return data
 
+    if code == 400:
+        raise DremioBadRequestException("Requested object does not exist on entity " + details, error)
     if code == 401:
-        raise DremioUnauthorizedException("Unauthorized on /api/v3/catalog " + details, error)
+        raise DremioUnauthorizedException("Unauthorized on api endpoint " + details, error)
     if code == 403:
         raise DremioPermissionException("Not permissioned to view entity at " + details, error)
     if code == 404:
@@ -49,10 +52,11 @@ def _get(url, token, details=''):
 
 
 def catalog_item(token, base_url, id=None, path=None):
-    """
-    fetch a specific catalog item by id or by path
+    """fetch a specific catalog item by id or by path
+
     https://docs.dremio.com/rest-api/catalog/get-catalog-id.html
     https://docs.dremio.com/rest-api/catalog/get-catalog-path.html
+
     :param token: auth token from previous login attempt
     :param base_url: base Dremio url
     :param id: unique dremio id for resource
@@ -71,6 +75,7 @@ def catalog_item(token, base_url, id=None, path=None):
 def catalog(token, base_url):
     """
     https://docs.dremio.com/rest-api/catalog/get-catalog.html populate the root dremio catalog
+
     :param token: auth token from previous login attempt
     :param base_url: base Dremio url
     :return: json of root resource
@@ -79,10 +84,12 @@ def catalog(token, base_url):
 
 
 def sql(token, base_url, query, context=None):
-    """
-    submit job w/ given sql
+    """submit job w/ given sql
+
     https://docs.dremio.com/rest-api/sql/post-sql.html
+
     :param token: auth token
+    :param base_url: base Dremio url
     :param query: sql query
     :param context: optional dremio context
     :return: job id json object
@@ -103,9 +110,10 @@ def sql(token, base_url, query, context=None):
 
 
 def job_status(token, base_url, job_id):
-    """
-    fetch job status
+    """fetch job status
+
     https://docs.dremio.com/rest-api/jobs/get-job.html
+
     :param token: auth token
     :param base_url: sql query
     :param job_id: job id (as returned by sql)
@@ -115,8 +123,8 @@ def job_status(token, base_url, job_id):
 
 
 def job_results(token, base_url, job_id, offset=0, limit=100):
-    """
-    fetch job results
+    """fetch job results
+
     https://docs.dremio.com/rest-api/jobs/get-job.html
 
     :param token: auth token
@@ -133,6 +141,147 @@ def job_results(token, base_url, job_id, offset=0, limit=100):
             offset,
             limit),
         token)
+
+
+def reflections(token, base_url, summary=False):
+    """fetch all reflections
+
+    https://docs.dremio.com/rest-api/reflections/get-reflection.html
+
+    :param token: auth token
+    :param base_url: sql query
+    :param summary: fetch only the reflection summary
+    :return: result object
+    """
+    return _get(base_url + "/api/v3/reflection" + ('/summary' if summary else ''), token)
+
+
+def reflection(token, base_url, reflectionid):
+    """fetch a single reflection by id
+
+    https://docs.dremio.com/rest-api/reflections/get-reflection.html
+
+    :param token: auth token
+    :param base_url: sql query
+    :param reflectionid: id of the reflection to fetch
+    :return: result object
+    """
+    return _get(base_url + "/api/v3/reflection/{}".format(reflectionid), token)
+
+
+def wlm_queues(token, base_url):
+    """fetch all wlm queues
+
+    https://docs.dremio.com/rest-api/reflections/get-wlm-queue.html
+
+    :param token: auth token
+    :param base_url: sql query
+    :return: result object
+    """
+    return _get(base_url + "/api/v3/wlm/queue", token)
+
+
+def wlm_rules(token, base_url):
+    """fetch all wlm rules
+
+    https://docs.dremio.com/rest-api/reflections/get-wlm-queue.html
+
+    :param token: auth token
+    :param base_url: sql query
+    :return: result object
+    """
+    return _get(base_url + "/api/v3/wlm/rule", token)
+
+
+def votes(token, base_url):
+    """fetch all votes
+
+    https://docs.dremio.com/rest-api/reflections/get-vote.html
+
+    :param token: auth token
+    :param base_url: sql query
+    :return: result object
+    """
+    return _get(base_url + "/api/v3/vote", token)
+
+
+def user(token, base_url, uid=None, name=None):
+    """
+    fetch all votes
+    https://docs.dremio.com/rest-api/reflections/get-user.html
+
+    :param token: auth token
+    :param base_url: sql query
+    :param uid: unique dremio id for user
+    :param name: name for a user
+    :return: result object
+    """
+    if uid is None and name is None:
+        raise TypeError(
+            "both id and name can't be None for a user call")
+    idpath = (uid if uid else '') + ', ' + ('.'.join(name) if name else '')
+    endpoint = '/{}'.format(uid) if uid else '/by-name/{}'.format(
+        '/'.join(name).replace('"', ''))
+    return _get(base_url + "/api/v3/user{}".format(endpoint), token, idpath)
+
+
+def group(token, base_url, gid=None, name=None):
+    """fetch a group based on id or name
+
+    https://docs.dremio.com/rest-api/reflections/get-group.html
+
+    :param token: auth token
+    :param base_url: sql query
+    :param gid: unique dremio id for group
+    :param name: name for a group
+    :return: result object
+    """
+    if gid is None and name is None:
+        raise TypeError(
+            "both id and name can't be None for a user call")
+    idpath = (gid if gid else '') + ', ' + ('.'.join(name) if name else '')
+    endpoint = '/{}'.format(gid) if gid else '/by-name/{}'.format(
+        '/'.join(name).replace('"', ''))
+    return _get(base_url + "/api/v3/group{}".format(endpoint), token, idpath)
+
+
+def personal_access_token(token, base_url, uid):
+    """fetch a PAT for a user based on id
+
+    https://docs.dremio.com/rest-api/user/get-user-id-token.html
+
+    :param token: auth token
+    :param base_url: sql query
+    :param uid: id of a user
+    :return: result object
+    """
+    return _get(base_url + "/api/v3/user/{}/token".format(uid), token)
+
+
+def collaboration_tags(token, base_url, cid):
+    """fetch tags for a catalog entry
+
+    https://docs.dremio.com/rest-api/user/get-catalog-collaboration.html
+
+    :param token: auth token
+    :param base_url: sql query
+    :param cid: id of a catalog entity
+    :return: result object
+    """
+    return _get(base_url + "/api/v3/catalog/{}/collaboration/tag".format(cid), token)
+
+
+def collaboration_wiki(token, base_url, cid):
+    """fetch wiki for a catalog entry
+
+    https://docs.dremio.com/rest-api/user/get-catalog-collaboration.html
+
+    :param token: auth token
+    :param base_url: sql query
+    :param cid: id of a catalog entity
+    :return: result object
+    """
+    return _get(base_url + "/api/v3/catalog/{}/collaboration/wiki".format(cid), token)
 
 
 def _raise_for_status(self):

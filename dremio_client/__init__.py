@@ -33,15 +33,23 @@ __version__ = '0.2.4'
 
 import os
 from .dremio_client import DremioClient
+from .dremio_simple_client import SimpleClient
 from .conf import build_config
 from .model.endpoints import catalog, catalog_item, sql, job_results, job_status
+
+
+def get_config(config_dir=None):
+    if config_dir:
+        os.environ['DREMIO_CLIENTDIR'] = config_dir
+    return build_config()
 
 
 def init(config_dir=None, simple_client=False):
     """ create a new Dremio client object
 
     This returns a rich client by default. This client abstracts the Dremio catalog into a
-    a set of Python objects and enables *<Tab>* completion where possible.
+    a set of Python objects and enables *<Tab>* completion where possible. It also supports
+    fetching datasets via flight or odbc
 
     The simple client simply wraps the Dremio REST endpoints an returns ``dict`` objects
 
@@ -54,20 +62,22 @@ def init(config_dir=None, simple_client=False):
 
     >>> client = init('/my/config/dir')
     """
-    if config_dir:
-        os.environ['DREMIO_CLIENTDIR'] = config_dir
-    config = build_config()
+    config = get_config(config_dir)
     return _connect(config['hostname'].get(),
                     config['auth']['username'].get(),
                     config['auth']['password'].get(),
                     config['ssl'].get(bool),
-                    config['port'].get(int))
+                    config['port'].get(int),
+                    config['flight']['port'].get(int),
+                    config['odbc']['port'].get(int),
+                    config['auth']['type'],
+                    simple_client)
 
 
-def _connect(hostname, username=None, password=None, tls=True,
-             port=None, flight_port=47470, auth='basic'):
-    return DremioClient(hostname, username, password,
-                        tls, port, flight_port, auth)
+def _connect(hostname, username, password, tls, port, flight_port, odbc_port, auth, simple):
+    if simple:
+        return SimpleClient(hostname, username, password, tls, port, auth)
+    return DremioClient(hostname, username, password, tls, port, flight_port, odbc_port, auth)
 
 
 __all__ = ['init', 'catalog', 'catalog_item', 'sql', 'job_status', 'job_results']
