@@ -70,7 +70,7 @@ class DremioClient(object):
 
     def _fetch_reflections(self):
         refs = reflections(self._token, self._base_url)
-        for ref in refs:  # todo I think we should attach reflections to their catalog entries...
+        for ref in refs['data']:  # todo I think we should attach reflections to their catalog entries...
             self._reflections.append(make_reflection(ref))
 
     @property
@@ -81,8 +81,8 @@ class DremioClient(object):
 
     def _fetch_wlm_queues(self):
         refs = wlm_queues(self._token, self._base_url)
-        for ref in refs:  # todo I think we should attach reflections to their catalog entries...
-            self._wlm_queues.append(make_wlm_queue(ref['data']))
+        for ref in refs['data']:  # todo I think we should attach reflections to their catalog entries...
+            self._wlm_queues.append(make_wlm_queue(ref))
 
     @property
     def wlm_rules(self):
@@ -92,8 +92,8 @@ class DremioClient(object):
 
     def _fetch_wlm_rules(self):
         refs = wlm_rules(self._token, self._base_url)
-        for ref in refs:  # todo I think we should attach reflections to their catalog entries...
-            self._wlm_rules.append(make_wlm_rule(ref['rules']))
+        for ref in refs['rules']:  # todo I think we should attach reflections to their catalog entries...
+            self._wlm_rules.append(make_wlm_rule(ref))
 
     @property
     def votes(self):
@@ -103,8 +103,8 @@ class DremioClient(object):
 
     def _fetch_votes(self):
         refs = votes(self._token, self._base_url)
-        for ref in refs:  # todo I think we should attach reflections to their catalog entries...
-            self._votes.append(make_vote(ref['data']))
+        for ref in refs['data']:  # todo I think we should attach reflections to their catalog entries...
+            self._votes.append(make_vote(ref))
 
     def query(self, sql, pandas=True):
         return query(sql,

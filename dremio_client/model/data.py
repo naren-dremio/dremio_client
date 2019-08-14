@@ -38,7 +38,7 @@ class VoteMetadata(namedtuple('VoteMetadata', [
     "entityType"
 ])):
     def to_json(self):
-        json.dumps(self._asdict())
+        return json.dumps(self._asdict())
 
 
 class QueueMetadata(namedtuple('QueueMetadata', [
@@ -50,7 +50,7 @@ class QueueMetadata(namedtuple('QueueMetadata', [
     "maxStartTimeoutMs"
 ])):
     def to_json(self):
-        json.dumps(self._asdict())
+        return json.dumps(self._asdict())
 
 
 class RuleMetadata(namedtuple('RuleMetadata', [
@@ -62,7 +62,7 @@ class RuleMetadata(namedtuple('RuleMetadata', [
     "id"
 ])):
     def to_json(self):
-        json.dumps(self._asdict())
+        return json.dumps(self._asdict())
 
 
 class ReflectionSummaryMetadata(namedtuple('ReflectionSummaryMetadata', ["entityType",
@@ -80,7 +80,7 @@ class ReflectionSummaryMetadata(namedtuple('ReflectionSummaryMetadata', ["entity
                                                                          "status",
                                                                          ])):
     def to_json(self):
-        json.dumps(self._asdict())
+        return json.dumps(self._asdict())
 
 
 class ReflectionMetadata(namedtuple('ReflectionMetadata', ["entityType",
@@ -104,7 +104,7 @@ class ReflectionMetadata(namedtuple('ReflectionMetadata', ["entityType",
                                                            "partitionDistributionStrategy"
                                                            ])):
     def to_json(self):
-        json.dumps(self._asdict())
+        return json.dumps(self._asdict())
 
 
 DatasetMetaData = namedtuple('DatasetMetaData', ['entityType',

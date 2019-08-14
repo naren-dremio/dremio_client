@@ -49,10 +49,11 @@ def _get(url, token, details=''):
 
 
 def catalog_item(token, base_url, id=None, path=None):
-    """
-    fetch a specific catalog item by id or by path
+    """fetch a specific catalog item by id or by path
+
     https://docs.dremio.com/rest-api/catalog/get-catalog-id.html
     https://docs.dremio.com/rest-api/catalog/get-catalog-path.html
+
     :param token: auth token from previous login attempt
     :param base_url: base Dremio url
     :param id: unique dremio id for resource
@@ -71,6 +72,7 @@ def catalog_item(token, base_url, id=None, path=None):
 def catalog(token, base_url):
     """
     https://docs.dremio.com/rest-api/catalog/get-catalog.html populate the root dremio catalog
+
     :param token: auth token from previous login attempt
     :param base_url: base Dremio url
     :return: json of root resource
@@ -79,9 +81,10 @@ def catalog(token, base_url):
 
 
 def sql(token, base_url, query, context=None):
-    """
-    submit job w/ given sql
+    """submit job w/ given sql
+
     https://docs.dremio.com/rest-api/sql/post-sql.html
+
     :param token: auth token
     :param base_url: base Dremio url
     :param query: sql query
@@ -104,9 +107,10 @@ def sql(token, base_url, query, context=None):
 
 
 def job_status(token, base_url, job_id):
-    """
-    fetch job status
+    """fetch job status
+
     https://docs.dremio.com/rest-api/jobs/get-job.html
+
     :param token: auth token
     :param base_url: sql query
     :param job_id: job id (as returned by sql)
@@ -116,8 +120,8 @@ def job_status(token, base_url, job_id):
 
 
 def job_results(token, base_url, job_id, offset=0, limit=100):
-    """
-    fetch job results
+    """fetch job results
+
     https://docs.dremio.com/rest-api/jobs/get-job.html
 
     :param token: auth token
@@ -137,8 +141,8 @@ def job_results(token, base_url, job_id, offset=0, limit=100):
 
 
 def reflections(token, base_url, summary=False):
-    """
-    fetch all reflections
+    """fetch all reflections
+
     https://docs.dremio.com/rest-api/reflections/get-reflection.html
 
     :param token: auth token
@@ -150,8 +154,8 @@ def reflections(token, base_url, summary=False):
 
 
 def reflection(token, base_url, reflectionid):
-    """
-    fetch a single reflection by id
+    """fetch a single reflection by id
+
     https://docs.dremio.com/rest-api/reflections/get-reflection.html
 
     :param token: auth token
@@ -163,8 +167,8 @@ def reflection(token, base_url, reflectionid):
 
 
 def wlm_queues(token, base_url):
-    """
-    fetch all wlm queues
+    """fetch all wlm queues
+
     https://docs.dremio.com/rest-api/reflections/get-wlm-queue.html
 
     :param token: auth token
@@ -175,8 +179,8 @@ def wlm_queues(token, base_url):
 
 
 def wlm_rules(token, base_url):
-    """
-    fetch all wlm rules
+    """fetch all wlm rules
+
     https://docs.dremio.com/rest-api/reflections/get-wlm-queue.html
 
     :param token: auth token
@@ -187,8 +191,8 @@ def wlm_rules(token, base_url):
 
 
 def votes(token, base_url):
-    """
-    fetch all votes
+    """fetch all votes
+
     https://docs.dremio.com/rest-api/reflections/get-vote.html
 
     :param token: auth token
@@ -219,8 +223,8 @@ def user(token, base_url, uid=None, name=None):
 
 
 def group(token, base_url, gid=None, name=None):
-    """
-    fetch a group based on id or name
+    """fetch a group based on id or name
+
     https://docs.dremio.com/rest-api/reflections/get-group.html
 
     :param token: auth token
@@ -239,8 +243,8 @@ def group(token, base_url, gid=None, name=None):
 
 
 def personal_access_token(token, base_url, uid):
-    """
-    fetch a PAT for a user based on id
+    """fetch a PAT for a user based on id
+
     https://docs.dremio.com/rest-api/user/get-user-id-token.html
 
     :param token: auth token
