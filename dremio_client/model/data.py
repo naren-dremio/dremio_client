@@ -272,6 +272,7 @@ class Catalog(dict):
         result = collaboration_tags(self._token, self._base_url, self.meta['id'])
         return make_tags(result)
 
+
 class Root(Catalog):
 
     def __init__(self, token=None, base_url=None, flight_endpoint=None):

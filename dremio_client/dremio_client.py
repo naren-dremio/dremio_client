@@ -28,8 +28,7 @@ import logging
 
 from .auth import basic_auth
 from .model.catalog import catalog
-from .model.endpoints import reflections, wlm_queues, wlm_rules, votes, user, group, personal_access_token, \
-    collaboration_wiki, collaboration_tags
+from .model.endpoints import reflections, wlm_queues, wlm_rules, votes, user, group, personal_access_token
 from .model.data import make_reflection, make_wlm_queue, make_wlm_rule, make_vote
 from .flight import query as _flight_query
 from .util import run as _rest_query
@@ -53,7 +52,7 @@ class DremioClient(object):
         self._flight_port = flight_port
         self._odbc_port = odbc_port
         self._base_url = ('https' if tls else 'http') + '://' + \
-                         hostname + (':{}'.format(port) if port else '')
+            hostname + (':{}'.format(port) if port else '')
         self._username = username
         self._password = password
         self._token = basic_auth(self._base_url, username, password)
