@@ -24,7 +24,7 @@
 #
 from .auth import basic_auth
 from .model.endpoints import catalog, job_results, job_status, sql, catalog_item, reflections, reflection, wlm_queues, \
-    wlm_rules, votes
+    wlm_rules, votes, user, group, personal_access_token
 from .util import run, run_async, refresh_metadata
 
 
@@ -77,6 +77,15 @@ class SimpleClient(object):
 
     def votes(self):
         return votes(self._token, self._base_url)
+
+    def user(self, uid=None, name=None):
+        return user(self._token, self._base_url, uid, name)
+
+    def group(self, gid=None, name=None):
+        return group(self._token, self._base_url, gid, name)
+
+    def personal_access_token(self, uid):
+        return personal_access_token(self._token, self._base_url, uid)
 
     def query(self, query, context=None, sleep_time=10, asynchronous=False):
         """ Run a single sql query asynchronously

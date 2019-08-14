@@ -27,7 +27,7 @@
 
 from .auth import basic_auth
 from .model.catalog import catalog
-from .model.endpoints import reflections, wlm_queues, wlm_rules, votes
+from .model.endpoints import reflections, wlm_queues, wlm_rules, votes, user, group, personal_access_token
 from .model.data import make_reflection, make_wlm_queue, make_wlm_rule, make_vote
 from .flight import query
 
@@ -104,7 +104,7 @@ class DremioClient(object):
     def _fetch_votes(self):
         refs = votes(self._token, self._base_url)
         for ref in refs:  # todo I think we should attach reflections to their catalog entries...
-            self._votes.append(make_votes(ref['data']))
+            self._votes.append(make_vote(ref['data']))
 
     def query(self, sql, pandas=True):
         return query(sql,
@@ -113,3 +113,12 @@ class DremioClient(object):
                      username=self._username,
                      password=self._password,
                      pandas=pandas)
+
+    def user(self, uid=None, name=None):
+        return user(self._token, self._base_url, uid, name)
+
+    def group(self, gid=None, name=None):
+        return group(self._token, self._base_url, gid, name)
+
+    def personal_access_token(self, uid):
+        return personal_access_token(self._token, self._base_url, uid)

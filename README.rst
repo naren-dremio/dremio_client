@@ -95,3 +95,4 @@ TODO
 * search
 * docs
 * logging
+* option to skip ssl verification

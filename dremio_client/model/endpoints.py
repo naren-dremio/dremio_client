@@ -83,6 +83,7 @@ def sql(token, base_url, query, context=None):
     submit job w/ given sql
     https://docs.dremio.com/rest-api/sql/post-sql.html
     :param token: auth token
+    :param base_url: base Dremio url
     :param query: sql query
     :param context: optional dremio context
     :return: job id json object
@@ -195,6 +196,59 @@ def votes(token, base_url):
     :return: result object
     """
     return _get(base_url + "/api/v3/vote", token)
+
+
+def user(token, base_url, uid=None, name=None):
+    """
+    fetch all votes
+    https://docs.dremio.com/rest-api/reflections/get-user.html
+
+    :param token: auth token
+    :param base_url: sql query
+    :param uid: unique dremio id for user
+    :param name: name for a user
+    :return: result object
+    """
+    if uid is None and name is None:
+        raise TypeError(
+            "both id and name can't be None for a user call")
+    idpath = (uid if uid else '') + ', ' + ('.'.join(name) if name else '')
+    endpoint = '/{}'.format(uid) if uid else '/by-name/{}'.format(
+        '/'.join(name).replace('"', ''))
+    return _get(base_url + "/api/v3/user{}".format(endpoint), token, idpath)
+
+
+def group(token, base_url, gid=None, name=None):
+    """
+    fetch a group based on id or name
+    https://docs.dremio.com/rest-api/reflections/get-group.html
+
+    :param token: auth token
+    :param base_url: sql query
+    :param gid: unique dremio id for group
+    :param name: name for a group
+    :return: result object
+    """
+    if gid is None and name is None:
+        raise TypeError(
+            "both id and name can't be None for a user call")
+    idpath = (gid if gid else '') + ', ' + ('.'.join(name) if name else '')
+    endpoint = '/{}'.format(gid) if gid else '/by-name/{}'.format(
+        '/'.join(name).replace('"', ''))
+    return _get(base_url + "/api/v3/group{}".format(endpoint), token, idpath)
+
+
+def personal_access_token(token, base_url, uid):
+    """
+    fetch a PAT for a user based on id
+    https://docs.dremio.com/rest-api/user/get-user-id-token.html
+
+    :param token: auth token
+    :param base_url: sql query
+    :param uid: id of a user
+    :return: result object
+    """
+    return _get(base_url + "/api/v3/user/{}/token".format(uid), token)
 
 
 def _raise_for_status(self):

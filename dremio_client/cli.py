@@ -41,6 +41,9 @@ from .model.endpoints import reflection as _reflection
 from .model.endpoints import wlm_rules as _wlm_rules
 from .model.endpoints import wlm_queues as _wlm_queues
 from .model.endpoints import votes as _votes
+from .model.endpoints import group as _group
+from .model.endpoints import user as _user
+from .model.endpoints import personal_access_token as _pat
 
 
 @click.group()
@@ -214,6 +217,47 @@ def votes(args):
     """
     base_url, token = get_base_url_token(args)
     x = _votes(token, base_url)
+    click.echo(x)
+
+
+@cli.command()
+@click.option('--uid', '-u', help='unique id for a user')
+@click.option('--name', '-n', help='human readable name of a user')
+@click.pass_obj
+def user(args, gid, name):
+    """
+    return user info
+
+    """
+    base_url, token = get_base_url_token(args)
+    x = _user(token, base_url, gid, name)
+    click.echo(x)
+
+
+@cli.command()
+@click.option('--gid', '-g', help='unique id for a group')
+@click.option('--name', '-n', help='human readable name of a group')
+@click.pass_obj
+def group(args, gid, name):
+    """
+    return group info
+
+    """
+    base_url, token = get_base_url_token(args)
+    x = _group(token, base_url, gid, name)
+    click.echo(x)
+
+
+@cli.command()
+@click.argument('uid', nargs=1, required=True)
+@click.pass_obj
+def pat(args, uid):
+    """
+    return personal access token info for a given user id
+
+    """
+    base_url, token = get_base_url_token(args)
+    x = _pat(token, base_url, uid)
     click.echo(x)
 
 
