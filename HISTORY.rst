@@ -11,3 +11,8 @@ History
 ------------------
 
 * Alpha quality release with partial implementation of features. First PyPI release.
+
+0.2.4 (2019-08-14)
+------------------
+
+* Beta quality release for GET based endpoints
