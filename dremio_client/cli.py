@@ -27,6 +27,7 @@
 import sys
 import os
 import click
+import simplejson as json
 
 from .conf import get_base_url_token
 from .util.query import run
@@ -73,7 +74,7 @@ def query(args, sql):
     results = list()
     for x in run(token, base_url, sql):
         results.extend(x['rows'])
-    click.echo(results)
+    click.echo(json.dumps(results))
 
 
 @cli.command()
@@ -87,7 +88,7 @@ def sql(args, sql_query, context):
     """
     base_url, token = get_base_url_token(args)
     x = _sql(token, base_url, ' '.join(sql_query), context)
-    click.echo(x)
+    click.echo(json.dumps(x))
 
 
 @cli.command()
@@ -100,7 +101,7 @@ def job_status(args, jobid):
     """
     base_url, token = get_base_url_token(args)
     x = _job_status(token, base_url, jobid)
-    click.echo(x)
+    click.echo(json.dumps(x))
 
 
 @cli.command()
@@ -117,7 +118,7 @@ def job_results(args, jobid, offset, limit):
     """
     base_url, token = get_base_url_token(args)
     x = _job_results(token, base_url, jobid, offset, limit)
-    click.echo(x)
+    click.echo(json.dumps(x))
 
 
 @cli.command()
@@ -129,7 +130,7 @@ def catalog(args):
     """
     base_url, token = get_base_url_token(args)
     x = _catalog(token, base_url)
-    click.echo(x)
+    click.echo(json.dumps(x))
 
 
 @cli.command()
@@ -146,7 +147,7 @@ def catalog_item(args):
     """
     base_url, token = get_base_url_token(args)
     x = _catalog_item(token, base_url)
-    click.echo(x)
+    click.echo(json.dumps(x))
 
 
 if __name__ == "__main__":

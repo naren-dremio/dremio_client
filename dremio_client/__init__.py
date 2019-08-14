@@ -37,33 +37,40 @@ from .conf import build_config
 from .model.endpoints import catalog, catalog_item, sql, job_results, job_status
 
 
-def init(config_dir=None):
+def init(config_dir=None, simple_client=False):
+    """ create a new Dremio client object
+
+    This returns a rich client by default. This client abstracts the Dremio catalog into a
+    a set of Python objects and enables *<Tab>* completion where possible.
+
+    The simple client simply wraps the Dremio REST endpoints an returns ``dict`` objects
+
+
+    :param config_dir: optional directory to look for config in
+    :param simple_client: return the 'simple' client.
+    :return: either a simple or rich client
+
+    :example:
+
+    >>> client = init('/my/config/dir')
+    """
     if config_dir:
         os.environ['DREMIO_CLIENTDIR'] = config_dir
     config = build_config()
-    return connect(config['hostname'].get(),
-                   config['auth']['username'].get(),
-                   config['auth']['password'].get(),
-                   config['ssl'].get(bool),
-                   config['port'].get(int))
+    return _connect(config['hostname'].get(),
+                    config['auth']['username'].get(),
+                    config['auth']['password'].get(),
+                    config['ssl'].get(bool),
+                    config['port'].get(int))
 
 
-def connect(hostname, username=None, password=None, tls=True,
-            port=None, flight_port=47470, auth='basic'):
-    """
-    Create a Dremio Client instance. This currently only supports basic auth from the constructor.
-    Will be extended for oauth, token auth and storing auth on disk or in stores in the future
-
-    :param base_url: base url for Dremio coordinator
-    :param username:  username
-    :param password: password
-    :param auth: always basic
-    """
+def _connect(hostname, username=None, password=None, tls=True,
+             port=None, flight_port=47470, auth='basic'):
     return DremioClient(hostname, username, password,
                         tls, port, flight_port, auth)
 
 
-__all__ = ['init', 'connect', 'catalog', 'catalog_item', 'sql', 'job_status', 'job_results']
+__all__ = ['init', 'catalog', 'catalog_item', 'sql', 'job_status', 'job_results']
 
 # https://github.com/ipython/ipython/issues/11653
 # autocomplete doesn't work when using jedi so turn it off!
