@@ -43,3 +43,7 @@ class DremioPermissionException(DremioException):
 
 class DremioNotFoundException(DremioException):
     pass
+
+
+class DremioBadRequestException(DremioException):
+    pass

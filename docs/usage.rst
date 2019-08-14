@@ -10,7 +10,7 @@ Configuration
 -------------
 
 The Dremio Client is configured using the `confuse`_ yaml based configuration library. This looks for a configuration
-file in:
+file called ``config.yaml`` in:
 
 * macOS: ``~/.config/dremio_client`` and ``~/Library/Application Support/dremio_client``
 * Other Unix: ``~/.config/dremio_client`` and ``/etc/dremio_client``

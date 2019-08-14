@@ -86,9 +86,7 @@ are welcome. See `CONTRIBUTING`_
 TODO
 ----
 
-* acls handled correctly
 * put, delete and post
-* collaborations handled correctly
 * refresh reflections
 * add reflections into catalog
 * test for larger spaces and ensure it doesnt fetch everytihgn if we hit directly
@@ -96,3 +94,4 @@ TODO
 * docs
 * logging
 * option to skip ssl verification
+* handle exceptions correctly in cli

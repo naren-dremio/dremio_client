@@ -31,6 +31,7 @@ import simplejson as json
 
 from .conf import get_base_url_token
 from .util.query import run
+from .error import DremioNotFoundException
 from .model.endpoints import sql as _sql
 from .model.endpoints import job_status as _job_status
 from .model.endpoints import job_results as _job_results
@@ -44,6 +45,8 @@ from .model.endpoints import votes as _votes
 from .model.endpoints import group as _group
 from .model.endpoints import user as _user
 from .model.endpoints import personal_access_token as _pat
+from .model.endpoints import collaboration_wiki as _collaboration_wiki
+from .model.endpoints import collaboration_tags as _collaboration_tags
 
 
 @click.group()
@@ -142,10 +145,10 @@ def catalog(args):
 
 
 @cli.command()
-@click.option('-i', '--path', help="Path of a given catalog item")
-@click.option('-p', '--id', help="id of a given catalog item")
+@click.option('-i', '--id', help="Path of a given catalog item")
+@click.option('-p', '--path', help="id of a given catalog item")
 @click.pass_obj
-def catalog_item(args):
+def catalog_item(args, id, path):
     """
     return the details of a given catalog item
 
@@ -154,7 +157,7 @@ def catalog_item(args):
 
     """
     base_url, token = get_base_url_token(args)
-    x = _catalog_item(token, base_url)
+    x = _catalog_item(token, base_url, id, [path.replace('.', '/')] if path else None)
     click.echo(json.dumps(x))
 
 
@@ -168,7 +171,7 @@ def reflections(args, summary):
     """
     base_url, token = get_base_url_token(args)
     x = _reflections(token, base_url, summary)
-    click.echo(x)
+    click.echo(json.dumps(x))
 
 
 @cli.command()
@@ -181,7 +184,7 @@ def reflection(args, reflectionid):
     """
     base_url, token = get_base_url_token(args)
     x = _reflection(token, base_url, reflectionid)
-    click.echo(x)
+    click.echo(json.dumps(x))
 
 
 @cli.command()
@@ -193,7 +196,7 @@ def wlm_rules(args):
     """
     base_url, token = get_base_url_token(args)
     x = _wlm_rules(token, base_url)
-    click.echo(x)
+    click.echo(json.dumps(x))
 
 
 @cli.command()
@@ -205,7 +208,7 @@ def wlm_queues(args):
     """
     base_url, token = get_base_url_token(args)
     x = _wlm_queues(token, base_url)
-    click.echo(x)
+    click.echo(json.dumps(x))
 
 
 @cli.command()
@@ -217,7 +220,7 @@ def votes(args):
     """
     base_url, token = get_base_url_token(args)
     x = _votes(token, base_url)
-    click.echo(x)
+    click.echo(json.dumps(x))
 
 
 @cli.command()
@@ -231,7 +234,7 @@ def user(args, gid, name):
     """
     base_url, token = get_base_url_token(args)
     x = _user(token, base_url, gid, name)
-    click.echo(x)
+    click.echo(json.dumps(x))
 
 
 @cli.command()
@@ -245,7 +248,7 @@ def group(args, gid, name):
     """
     base_url, token = get_base_url_token(args)
     x = _group(token, base_url, gid, name)
-    click.echo(x)
+    click.echo(json.dumps(x))
 
 
 @cli.command()
@@ -258,7 +261,83 @@ def pat(args, uid):
     """
     base_url, token = get_base_url_token(args)
     x = _pat(token, base_url, uid)
-    click.echo(x)
+    click.echo(json.dumps(x))
+
+
+@cli.command()
+@click.option('--cid', '-c', help='unique id for a catalog entity')
+@click.option('--path', '-p', help='path of a catalog entity')
+@click.pass_obj
+def tags(args, cid, path):
+    """
+    returns tags for a given catalog entity id or path
+    only cid or path can be specified. path incurs a second lookup to get the id
+
+    """
+    base_url, token = get_base_url_token(args)
+    if path:
+        res = _catalog_item(token, base_url, None, [path.replace('.', '/')])
+        cid = res['id']
+    try:
+        x = _collaboration_tags(token, base_url, cid)
+        click.echo(json.dumps(x))
+    except DremioNotFoundException:
+        click.echo("Wiki not found or entity does not exist")
+
+
+@cli.command()
+@click.option('--cid', '-c', help='unique id for a catalog entity')
+@click.option('--path', '-p', help='path of a catalog entity')
+@click.option('--pretty-print', '-v', is_flag=True, help='format markdown for terminal')
+@click.pass_obj
+def wiki(args, cid, path, pretty_print):
+    """
+    returns wiki for a given catalog entity id or path
+    only cid or path can be specified. path incurs a second lookup to get the id
+
+    activating the pretty-print flag will attempt to convert the text field to plain-text for the console
+
+    """
+    base_url, token = get_base_url_token(args)
+    if path:
+        res = _catalog_item(token, base_url, None, [path.replace('.', '/')])
+        cid = res['id']
+    try:
+        x = _collaboration_wiki(token, base_url, cid)
+        if pretty_print:
+            try:
+                text = _to_text(x['text'])
+                click.echo(text)
+            except ImportError:
+                click.echo("Can't convert text to console, please install markdown and BeautifulSoup")
+                click.echo(json.dumps(x))
+        else:
+            click.echo(json.dumps(x))
+    except DremioNotFoundException:
+        click.echo("Wiki not found or entity does not exist")
+
+
+def _to_text(text):
+    from markdown import Markdown
+    from io import StringIO
+
+    def unmark_element(element, stream=None):
+        if stream is None:
+            stream = StringIO()
+        if element.text:
+            stream.write(element.text)
+        for sub in element:
+            unmark_element(sub, stream)
+        if element.tail:
+            stream.write(element.tail)
+        return stream.getvalue()
+
+    # patching Markdown
+    Markdown.output_formats["plain"] = unmark_element
+    __md = Markdown(output_format="plain")
+    __md.stripTopLevelTags = False
+
+    return __md.convert(text)
 
 
 if __name__ == "__main__":

@@ -23,7 +23,8 @@
 #
 import requests
 from requests.exceptions import HTTPError
-from ..error import DremioUnauthorizedException, DremioNotFoundException, DremioPermissionException, DremioException
+from ..error import DremioUnauthorizedException, DremioNotFoundException, DremioPermissionException, DremioException, \
+    DremioBadRequestException
 
 
 def _get_headers(token):
@@ -39,8 +40,10 @@ def _get(url, token, details=''):
         data = r.json()
         return data
 
+    if code == 400:
+        raise DremioBadRequestException("Requested object does not exist on entity " + details, error)
     if code == 401:
-        raise DremioUnauthorizedException("Unauthorized on /api/v3/catalog " + details, error)
+        raise DremioUnauthorizedException("Unauthorized on api endpoint " + details, error)
     if code == 403:
         raise DremioPermissionException("Not permissioned to view entity at " + details, error)
     if code == 404:
@@ -253,6 +256,32 @@ def personal_access_token(token, base_url, uid):
     :return: result object
     """
     return _get(base_url + "/api/v3/user/{}/token".format(uid), token)
+
+
+def collaboration_tags(token, base_url, cid):
+    """fetch tags for a catalog entry
+
+    https://docs.dremio.com/rest-api/user/get-catalog-collaboration.html
+
+    :param token: auth token
+    :param base_url: sql query
+    :param cid: id of a catalog entity
+    :return: result object
+    """
+    return _get(base_url + "/api/v3/catalog/{}/collaboration/tag".format(cid), token)
+
+
+def collaboration_wiki(token, base_url, cid):
+    """fetch wiki for a catalog entry
+
+    https://docs.dremio.com/rest-api/user/get-catalog-collaboration.html
+
+    :param token: auth token
+    :param base_url: sql query
+    :param cid: id of a catalog entity
+    :return: result object
+    """
+    return _get(base_url + "/api/v3/catalog/{}/collaboration/wiki".format(cid), token)
 
 
 def _raise_for_status(self):
