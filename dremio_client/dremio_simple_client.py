@@ -23,7 +23,8 @@
 # under the License.
 #
 from .auth import basic_auth
-from .model.endpoints import catalog, job_results, job_status, sql, catalog_item
+from .model.endpoints import catalog, job_results, job_status, sql, catalog_item, reflections, reflection, wlm_queues, \
+    wlm_rules, votes
 from .util import run, run_async, refresh_metadata
 
 
@@ -61,6 +62,21 @@ class SimpleClient(object):
 
     def sql(self, query, context=None):
         return sql(self._token, self._base_url, query, context)
+
+    def reflections(self, summary=False):
+        return reflections(self._token, self._base_url, summary)
+
+    def reflection(self, reflectionid):
+        return reflection(self._token, self._base_url, reflectionid)
+
+    def wlm_queues(self):
+        return wlm_queues(self._token, self._base_url)
+
+    def wlm_rules(self):
+        return wlm_rules(self._token, self._base_url)
+
+    def votes(self):
+        return votes(self._token, self._base_url)
 
     def query(self, query, context=None, sleep_time=10, asynchronous=False):
         """ Run a single sql query asynchronously

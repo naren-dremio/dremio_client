@@ -33,6 +33,7 @@ __version__ = '0.2.4'
 
 import os
 from .dremio_client import DremioClient
+from .dremio_simple_client import SimpleClient
 from .conf import build_config
 from .model.endpoints import catalog, catalog_item, sql, job_results, job_status
 
@@ -65,7 +66,10 @@ def init(config_dir=None, simple_client=False):
 
 
 def _connect(hostname, username=None, password=None, tls=True,
-             port=None, flight_port=47470, auth='basic'):
+             port=None, flight_port=47470, auth='basic', simple=False):
+    if simple:
+        return SimpleClient(hostname, username, password,
+                            tls, port, flight_port, auth)
     return DremioClient(hostname, username, password,
                         tls, port, flight_port, auth)
 

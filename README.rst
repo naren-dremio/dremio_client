@@ -87,19 +87,11 @@ TODO
 ----
 
 * acls handled correctly
-* put, delete and post for catalog entries
+* put, delete and post
 * collaborations handled correctly
-* refresh
+* refresh reflections
 * add reflections into catalog
 * test for larger spaces and ensure it doesnt fetch everytihgn if we hit directly
 * search
 * docs
 * logging
-
-Credits
--------
-
-This package was created with Cookiecutter_ and the `audreyr/cookiecutter-pypackage`_ project template.
-
-.. _Cookiecutter: https://github.com/audreyr/cookiecutter
-.. _`audreyr/cookiecutter-pypackage`: https://github.com/audreyr/cookiecutter-pypackage

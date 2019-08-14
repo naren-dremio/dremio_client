@@ -36,6 +36,11 @@ from .model.endpoints import job_status as _job_status
 from .model.endpoints import job_results as _job_results
 from .model.endpoints import catalog as _catalog
 from .model.endpoints import catalog_item as _catalog_item
+from .model.endpoints import reflections as _reflections
+from .model.endpoints import reflection as _reflection
+from .model.endpoints import wlm_rules as _wlm_rules
+from .model.endpoints import wlm_queues as _wlm_queues
+from .model.endpoints import votes as _votes
 
 
 @click.group()
@@ -148,6 +153,68 @@ def catalog_item(args):
     base_url, token = get_base_url_token(args)
     x = _catalog_item(token, base_url)
     click.echo(json.dumps(x))
+
+
+@cli.command()
+@click.option('--summary', '-s', is_flag=True, help='only return summary reflection info')
+@click.pass_obj
+def reflections(args, summary):
+    """
+    return the reflection set
+
+    """
+    base_url, token = get_base_url_token(args)
+    x = _reflections(token, base_url, summary)
+    click.echo(x)
+
+
+@cli.command()
+@click.argument('reflectionid', nargs=1, required=True)
+@click.pass_obj
+def reflection(args, reflectionid):
+    """
+    return the reflection set
+
+    """
+    base_url, token = get_base_url_token(args)
+    x = _reflection(token, base_url, reflectionid)
+    click.echo(x)
+
+
+@cli.command()
+@click.pass_obj
+def wlm_rules(args):
+    """
+    return the list of wlm rules
+
+    """
+    base_url, token = get_base_url_token(args)
+    x = _wlm_rules(token, base_url)
+    click.echo(x)
+
+
+@cli.command()
+@click.pass_obj
+def wlm_queues(args):
+    """
+    return the list of wlm queues
+
+    """
+    base_url, token = get_base_url_token(args)
+    x = _wlm_queues(token, base_url)
+    click.echo(x)
+
+
+@cli.command()
+@click.pass_obj
+def votes(args):
+    """
+    return reflection votes
+
+    """
+    base_url, token = get_base_url_token(args)
+    x = _votes(token, base_url)
+    click.echo(x)
 
 
 if __name__ == "__main__":

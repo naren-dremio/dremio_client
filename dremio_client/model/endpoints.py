@@ -135,6 +135,68 @@ def job_results(token, base_url, job_id, offset=0, limit=100):
         token)
 
 
+def reflections(token, base_url, summary=False):
+    """
+    fetch all reflections
+    https://docs.dremio.com/rest-api/reflections/get-reflection.html
+
+    :param token: auth token
+    :param base_url: sql query
+    :param summary: fetch only the reflection summary
+    :return: result object
+    """
+    return _get(base_url + "/api/v3/reflection" + ('/summary' if summary else ''), token)
+
+
+def reflection(token, base_url, reflectionid):
+    """
+    fetch a single reflection by id
+    https://docs.dremio.com/rest-api/reflections/get-reflection.html
+
+    :param token: auth token
+    :param base_url: sql query
+    :param reflectionid: id of the reflection to fetch
+    :return: result object
+    """
+    return _get(base_url + "/api/v3/reflection/{}".format(reflectionid), token)
+
+
+def wlm_queues(token, base_url):
+    """
+    fetch all wlm queues
+    https://docs.dremio.com/rest-api/reflections/get-wlm-queue.html
+
+    :param token: auth token
+    :param base_url: sql query
+    :return: result object
+    """
+    return _get(base_url + "/api/v3/wlm/queue", token)
+
+
+def wlm_rules(token, base_url):
+    """
+    fetch all wlm rules
+    https://docs.dremio.com/rest-api/reflections/get-wlm-queue.html
+
+    :param token: auth token
+    :param base_url: sql query
+    :return: result object
+    """
+    return _get(base_url + "/api/v3/wlm/rule", token)
+
+
+def votes(token, base_url):
+    """
+    fetch all votes
+    https://docs.dremio.com/rest-api/reflections/get-vote.html
+
+    :param token: auth token
+    :param base_url: sql query
+    :return: result object
+    """
+    return _get(base_url + "/api/v3/vote", token)
+
+
 def _raise_for_status(self):
     """Raises stored :class:`HTTPError`, if one occurred. Copy from requests request.raise_for_status()"""
 
@@ -157,18 +219,3 @@ def _raise_for_status(self):
         return HTTPError(http_error_msg, response=self), self.status_code, reason
     else:
         return None, self.status_code, reason
-
-
-def reflections(token, base_url):
-    """
-    fetch all reflections
-    https://docs.dremio.com/rest-api/reflections/get-reflection.html
-
-    :param token: auth token
-    :param base_url: sql query
-    :return: result object
-    """
-    r = requests.get(base_url + "/api/v3/reflection", headers=_get_headers(token))
-    r.raise_for_status()
-    data = r.json()
-    return data

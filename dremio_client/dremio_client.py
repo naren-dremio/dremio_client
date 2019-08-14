@@ -27,6 +27,8 @@
 
 from .auth import basic_auth
 from .model.catalog import catalog
+from .model.endpoints import reflections, wlm_queues, wlm_rules, votes
+from .model.data import make_reflection, make_wlm_queue, make_wlm_rule, make_vote
 from .flight import query
 
 
@@ -50,12 +52,59 @@ class DremioClient(object):
         self._username = username
         self._password = password
         self._token = basic_auth(self._base_url, username, password)
-        self._catalog = catalog(
-            self._token, self._base_url, self.query)
+        self._catalog = catalog(self._token, self._base_url, self.query)
+        self._reflections = list()
+        self._wlm_queues = list()
+        self._wlm_rules = list()
+        self._votes = list()
 
     @property
     def data(self):
         return self._catalog
+
+    @property
+    def reflections(self):
+        if len(self._reflections) == 0:
+            self._fetch_reflections()
+        return self._reflections
+
+    def _fetch_reflections(self):
+        refs = reflections(self._token, self._base_url)
+        for ref in refs:  # todo I think we should attach reflections to their catalog entries...
+            self._reflections.append(make_reflection(ref))
+
+    @property
+    def wlm_queues(self):
+        if len(self._wlm_queues) == 0:
+            self._fetch_wlm_queues()
+        return self._wlm_queues
+
+    def _fetch_wlm_queues(self):
+        refs = wlm_queues(self._token, self._base_url)
+        for ref in refs:  # todo I think we should attach reflections to their catalog entries...
+            self._wlm_queues.append(make_wlm_queue(ref['data']))
+
+    @property
+    def wlm_rules(self):
+        if len(self._wlm_rules) == 0:
+            self._fetch_wlm_rules()
+        return self._wlm_rules
+
+    def _fetch_wlm_rules(self):
+        refs = wlm_rules(self._token, self._base_url)
+        for ref in refs:  # todo I think we should attach reflections to their catalog entries...
+            self._wlm_rules.append(make_wlm_rule(ref['rules']))
+
+    @property
+    def votes(self):
+        if len(self._votes) == 0:
+            self._fetch_votes()
+        return self._votes
+
+    def _fetch_votes(self):
+        refs = votes(self._token, self._base_url)
+        for ref in refs:  # todo I think we should attach reflections to their catalog entries...
+            self._votes.append(make_votes(ref['data']))
 
     def query(self, sql, pandas=True):
         return query(sql,

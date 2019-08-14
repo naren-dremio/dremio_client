@@ -74,6 +74,7 @@ def test_jobstatus(requests_mock):
     with pytest.raises(DremioNotFoundException):
         job_status("1234", 'http://localhost:9047', '1')
 
+
 def test_jobresults(requests_mock):
     requests_mock.get('http://localhost:9047/api/v3/job/1/results',
                       status_code=401, reason="Unauthorized for url")

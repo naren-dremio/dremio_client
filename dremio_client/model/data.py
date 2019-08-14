@@ -28,6 +28,85 @@ from .endpoints import catalog_item
 from ..util import refresh_metadata
 
 
+class VoteMetadata(namedtuple('VoteMetadata', [
+    "id",
+    "votes",
+    "datasetId",  # todo link to dataset
+    "datasetPath",  # todo link to dataset
+    "datasetType",
+    "datasetReflectionCount",
+    "entityType"
+])):
+    def to_json(self):
+        json.dumps(self._asdict())
+
+
+class QueueMetadata(namedtuple('QueueMetadata', [
+    "id",
+    "tag",
+    "name",
+    "cpuTier",
+    "maxAllowedRunningJobs",
+    "maxStartTimeoutMs"
+])):
+    def to_json(self):
+        json.dumps(self._asdict())
+
+
+class RuleMetadata(namedtuple('RuleMetadata', [
+    "name",
+    "conditions",
+    "acceptId",
+    "acceptName",
+    "action",
+    "id"
+])):
+    def to_json(self):
+        json.dumps(self._asdict())
+
+
+class ReflectionSummaryMetadata(namedtuple('ReflectionSummaryMetadata', ["entityType",
+                                                                         "id",
+                                                                         "createdAt",
+                                                                         "updatedAt",
+                                                                         "type",
+                                                                         "name",
+                                                                         "datasetId",
+                                                                         "datasetPath",
+                                                                         "datasetType",
+                                                                         "currentSizeBytes",
+                                                                         "totalSizeBytes",
+                                                                         "enabled",
+                                                                         "status",
+                                                                         ])):
+    def to_json(self):
+        json.dumps(self._asdict())
+
+
+class ReflectionMetadata(namedtuple('ReflectionMetadata', ["entityType",
+                                                           "id",
+                                                           "tag",
+                                                           "name",
+                                                           "enabled",
+                                                           "createdAt",
+                                                           "updatedAt",
+                                                           "type",
+                                                           "datasetId",
+                                                           "currentSizeBytes",
+                                                           "totalSizeBytes",
+                                                           "status",
+                                                           "dimensionFields",
+                                                           "measureFields",
+                                                           "displayFields",
+                                                           "distributionFields",
+                                                           "partitionFields",
+                                                           "sortFields",
+                                                           "partitionDistributionStrategy"
+                                                           ])):
+    def to_json(self):
+        json.dumps(self._asdict())
+
+
 DatasetMetaData = namedtuple('DatasetMetaData', ['entityType',
                                                  'id',
                                                  'path',
@@ -347,3 +426,77 @@ class VirtualDataset(Dataset):
     def __init__(self, token=None, base_url=None,
                  flight_endpoint=None, **kwargs):
         Dataset.__init__(self, token, base_url, flight_endpoint, **kwargs)
+
+
+def make_reflection(data, summary=False):
+    if summary:
+        return ReflectionSummaryMetadata(
+            entityType="reflection-summary",
+            id=data.get("id"),
+            createdAt=data.get("createdAt"),
+            updatedAt=data.get("updatedAt"),
+            type=data.get("type"),
+            name=data.get("name"),
+            datasetId=data.get("datasetId"),
+            datasetPath=data.get("datasetPath"),
+            datasetType=data.get("datasetType"),
+            currentSizeBytes=data.get("currentSizeBytes"),
+            totalSizeBytes=data.get("totalSizeBytes"),
+            enabled=data.get("enabled"),
+            status=data.get("status"),
+        )
+    return ReflectionMetadata(
+        entityType="reflection",
+        id=data.get("id"),
+        tag=data.get("tag"),
+        name=data.get("name"),
+        enabled=data.get("enabled"),
+        createdAt=data.get("createdAt"),
+        updatedAt=data.get("updatedAt"),
+        type=data.get("type"),
+        datasetId=data.get("datasetId"),  # todo link to dataset
+        currentSizeBytes=data.get("currentSizeBytes"),
+        totalSizeBytes=data.get("totalSizeBytes"),
+        status=data.get("status"),  # todo object
+        dimensionFields=data.get("dimensionFields"),  # todo object
+        measureFields=data.get("measureFields"),  # todo object
+        displayFields=data.get("displayFields"),  # todo object
+        distributionFields=data.get("distributionFields"),  # todo object
+        partitionFields=data.get("partitionFields"),  # todo object
+        sortFields=data.get("sortFields"),  # todo object
+        partitionDistributionStrategy=data.get("partitionDistributionStrategy"),
+    )
+
+
+def make_wlm_rule(rule):
+    return RuleMetadata(
+        id=rule.get("id"),
+        conditions=rule.get("conditions"),
+        name=rule.get("name"),
+        acceptId=rule.get("acceptId"),
+        acceptName=rule.get("acceptName"),
+        action=rule.get("action")
+    )
+
+
+def make_wlm_queue(queue):
+    return QueueMetadata(
+        id=queue.get("id"),
+        tag=queue.get("tag"),
+        name=queue.get("name"),
+        cpuTier=queue.get("cpuTier"),
+        maxAllowedRunningJobs=queue.get("maxAllowedRunningJobs"),
+        maxStartTimeoutMs=queue.get("maxStartTimeoutMs")
+    )
+
+
+def make_vote(vote):
+    return VoteMetadata(
+        id=vote.get("id"),
+        votes=vote.get("votes"),
+        datasetId=vote.get("datasetId"),
+        datasetPath=vote.get("datasetPath"),
+        datasetType=vote.get("datasetType"),
+        datasetReflectionCount=vote.get("datasetReflectionCount"),
+        entityType="vote-summary"
+    )
