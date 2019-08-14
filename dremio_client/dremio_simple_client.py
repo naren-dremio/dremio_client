@@ -24,6 +24,7 @@
 #
 from .auth import basic_auth
 from .model.endpoints import catalog, job_results, job_status, sql, catalog_item
+from .util import run, run_async, refresh_metadata
 
 
 class SimpleClient(object):
@@ -60,3 +61,37 @@ class SimpleClient(object):
 
     def sql(self, query, context=None):
         return sql(self._token, self._base_url, query, context)
+
+    def query(self, query, context=None, sleep_time=10, asynchronous=False):
+        """ Run a single sql query asynchronously
+
+        This executes a single sql query against the rest api asynchronously and returns a future for the result
+
+        :param query: valid sql query
+        :param context: optional context in which to execute the query
+        :param sleep_time: seconds to sleep between checking for finished state
+        :param asynchronous: boolean execute asynchronously
+        :raise: DremioException if job failed
+        :raise: DremioUnauthorizedException if token is incorrect or invalid
+        :return: concurrent.futures.Future for the result
+
+        :example:
+
+        >>> client =
+        >>> f = run_async('abc', 'http://localhost:9047', 'select * from sys.options')
+        >>> f.result()
+        [{'record':'1'}, {'record':'2'}]
+        """
+        if asynchronous:
+            return run_async(self._token, self._base_url, query, context, sleep_time)
+        return run(self._token, self._base_url, query, context, sleep_time)
+
+    def refresh_metadata(self, table):
+        """ Refresh the metadata for a given physical dataset
+
+        :param table: the physical dataset to be refreshed
+        :raise: DremioException if job failed
+        :raise: DremioUnauthorizedException if token is incorrect or invalid
+        :return: None
+        """
+        return refresh_metadata(self._token, self._base_url, table)
