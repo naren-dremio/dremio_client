@@ -26,6 +26,7 @@ import simplejson as json
 
 from .endpoints import catalog_item, collaboration_tags, collaboration_wiki
 from ..util import refresh_metadata
+from ..error import DremioException
 
 
 class VoteMetadata(namedtuple('VoteMetadata', [
@@ -195,6 +196,11 @@ def create(item, token, base_url, flight_endpoint, trim_path=0):
             return name, Home(token, base_url, flight_endpoint, **item)
         elif entity_type == 'space':
             return name, Space(token, base_url, flight_endpoint, **item)
+        elif entity_type == 'dataset':
+            if 'VIRTUAL' in obj_type:
+                return name, VirtualDataset(token, base_url, flight_endpoint, **item)
+            else:
+                return name, PhysicalDataset(token, base_url, flight_endpoint, **item)
     raise KeyError("unsupported type")
 
 
@@ -230,7 +236,7 @@ class Catalog(dict):
 
     def __dir__(self):
         if len(self.keys()) == 0 and 'meta' in self.__dict__:
-            if self.meta.entityType in {'source', 'home', 'space', 'folder', 'root'}:
+            if self.meta.entityType in {'source', 'home', 'space', 'folder', 'root', 'dataset'}:
                 result = self._catalog_item(self.meta.id if hasattr(self.meta, 'id') else None,
                                             self.meta.path if hasattr(self.meta, 'path') else None)
                 name, obj = create(result, self._token,
@@ -238,7 +244,7 @@ class Catalog(dict):
                 self.update(obj)
                 self.meta = self.meta._replace(**{k: v for k, v in obj.meta._asdict().items() if v})
                 return list(self.keys())
-        return list(self.keys())
+        return list(self.keys()) + ['_repr_html_']
 
     def to_json(self):
         result = self.meta._asdict()
@@ -253,6 +259,8 @@ class Catalog(dict):
         return json.dumps(result)
 
     def __getattr__(self, item):
+        if item == '_ipython_canary_method_should_not_exist_':
+            raise AttributeError
         try:
             value = dict.__getitem__(self, item)
             if value is None:
@@ -265,13 +273,33 @@ class Catalog(dict):
             return dict.__getitem__(self, item)
 
     def wiki(self):
-        result = collaboration_wiki(self._token, self._base_url, self.meta['id'])
+        result = collaboration_wiki(self._token, self._base_url, self.meta.id)
         return make_wiki(result)
 
     def tags(self):
-        result = collaboration_tags(self._token, self._base_url, self.meta['id'])
+        result = collaboration_tags(self._token, self._base_url, self.meta.id)
         return make_tags(result)
 
+    def __repr__(self):
+        return self.to_json()
+
+    def _repr_html_(self):
+        try:
+            tags = self.tags().tags
+            tags_html = '\n'.join(['<span class="badge">{}</span>'.format(i) for i in tags])
+            tag_html = '<div> <strong>Tags: </strong> {} </div>'.format(tags_html)
+        except DremioException:
+            tag_html = ''
+        try:
+            import markdown
+            wiki = self.wiki()
+            text = wiki.text
+            html = markdown.markdown(text)
+            return tag_html + html
+        except ImportError:
+            return self.__repr__()
+        except DremioException:
+            return self.__repr__()
 
 class Root(Catalog):
 
@@ -447,15 +475,15 @@ class Dataset(Catalog):
     def sql(self, sql):
         return self._flight_endpoint(sql)
 
-    def metadata_refresh(self):
-        refresh_metadata(self._token, self._base_url,
-                         ".".join(self.meta.path))
-
 
 class PhysicalDataset(Dataset):
     def __init__(self, token=None, base_url=None,
                  flight_endpoint=None, **kwargs):
         Dataset.__init__(self, token, base_url, flight_endpoint, **kwargs)
+
+    def metadata_refresh(self):
+        refresh_metadata(self._token, self._base_url,
+                         ".".join(self.meta.path))
 
 
 class VirtualDataset(Dataset):
