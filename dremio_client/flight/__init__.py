@@ -29,6 +29,7 @@ try:
     from .flight_auth import HttpDremioClientAuthHandler
     from pyarrow.compat import tobytes
 
+
     def connect(hostname='localhost', port=47470,
                 username='dremio', password='dremio123'):
         """
@@ -45,6 +46,7 @@ try:
             c.authenticate(HttpDremioClientAuthHandler(
                 username, password if password else ''))
         return c
+
 
     def query(sql, client=None, hostname='localhost', port=47470,
               username='dremio', password='dremio123', pandas=True):
@@ -84,6 +86,6 @@ except ImportError:
     def connect(*args, **kwargs):
         raise NotImplementedError("Python Flight bindings require Python 3 and pyarrow > 0.14.0")
 
+
     def query(*args, **kwargs):
         raise NotImplementedError("Python Flight bindings require Python 3 and pyarrow > 0.14.0")
-
