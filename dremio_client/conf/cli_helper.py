@@ -23,7 +23,6 @@
 #
 from .config_parser import build_config
 from ..auth import auth
-from confuse import NotFoundError
 
 
 def get_base_url_token(args=None):
@@ -32,9 +31,5 @@ def get_base_url_token(args=None):
     host = config['hostname'].get()
     port = ":" + str(config['port'].get(int))
     base_url = 'http{}://{}{}'.format(ssl, host, port)
-    try:
-        timeout = config['auth']['timeout'].get(int)
-    except NotFoundError:
-        timeout = 10
-    token = auth(base_url, config, timeout)
+    token = auth(base_url, config)
     return base_url, token

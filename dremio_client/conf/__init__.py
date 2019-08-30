@@ -24,3 +24,12 @@
 
 from .config_parser import build_config  # NOQA
 from .cli_helper import get_base_url_token  # NOQA
+from six import StringIO
+import yaml
+
+
+def to_dict(config):
+    ys = config.dump(redact=True)
+    fd = StringIO(ys)
+    dct = yaml.load(fd)
+    return dct

@@ -26,7 +26,7 @@
 """Main module."""
 import logging
 
-from .auth import basic_auth
+from .auth import auth
 from .model.catalog import catalog
 from .model.endpoints import reflections, wlm_queues, wlm_rules, votes, user, group, personal_access_token
 from .model.data import make_reflection, make_wlm_queue, make_wlm_rule, make_vote
@@ -37,26 +37,25 @@ from .odbc import query as _odbc_query
 
 class DremioClient(object):
 
-    def __init__(self, hostname, username=None, password=None,
-                 tls=True, port=None, flight_port=47470, odbc_port=31010, auth='basic'):
+    def __init__(self, config):
         """
         Create a Dremio Client instance. This currently only supports basic auth from the constructor.
         Will be extended for oauth, token auth and storing auth on disk or in stores in the future
 
-        :param base_url: base url for Dremio coordinator
-        :param username:  username
-        :param password: password
-        :param auth: always basic
+        :param config: config dict from confuse
         """
-        self._hostname = hostname
-        self._flight_port = flight_port
-        self._odbc_port = odbc_port
-        self._base_url = ('https' if tls else 'http') + '://' + \
-            hostname + (':{}'.format(port) if port else '')
-        self._username = username
-        self._password = password
-        self._token = basic_auth(self._base_url, username, password)
-        self._catalog = catalog(self._token, self._base_url, self.query)
+        port = config['port'].get(int)
+        self._hostname = config['hostname'].get()
+        self._base_url = ('https' if config['ssl'].get(bool) else 'http') + '://' + self._hostname + (
+            ':{}'.format(port) if port else '')
+        self._flight_port = config['flight']['port'].get(int)
+        self._odbc_port = config['odbc']['port'].get(int)
+
+        self._username = config['auth']['username']
+        self._password = config['auth']['password']
+        self._token = auth(self._base_url, config)
+        self._ssl_verify = config['verify'].get(bool)
+        self._catalog = catalog(self._token, self._base_url, self.query, self._ssl_verify)
         self._reflections = list()
         self._wlm_queues = list()
         self._wlm_rules = list()
@@ -73,7 +72,7 @@ class DremioClient(object):
         return self._reflections
 
     def _fetch_reflections(self):
-        refs = reflections(self._token, self._base_url)
+        refs = reflections(self._token, self._base_url, ssl_verify=self._ssl_verify)
         for ref in refs['data']:  # todo I think we should attach reflections to their catalog entries...
             self._reflections.append(make_reflection(ref))
 
@@ -84,7 +83,7 @@ class DremioClient(object):
         return self._wlm_queues
 
     def _fetch_wlm_queues(self):
-        refs = wlm_queues(self._token, self._base_url)
+        refs = wlm_queues(self._token, self._base_url, ssl_verify=self._ssl_verify)
         for ref in refs['data']:  # todo I think we should attach reflections to their catalog entries...
             self._wlm_queues.append(make_wlm_queue(ref))
 
@@ -95,7 +94,7 @@ class DremioClient(object):
         return self._wlm_rules
 
     def _fetch_wlm_rules(self):
-        refs = wlm_rules(self._token, self._base_url)
+        refs = wlm_rules(self._token, self._base_url, ssl_verify=self._ssl_verify)
         for ref in refs['rules']:  # todo I think we should attach reflections to their catalog entries...
             self._wlm_rules.append(make_wlm_rule(ref))
 
@@ -106,7 +105,7 @@ class DremioClient(object):
         return self._votes
 
     def _fetch_votes(self):
-        refs = votes(self._token, self._base_url)
+        refs = votes(self._token, self._base_url, ssl_verify=self._ssl_verify)
         for ref in refs['data']:  # todo I think we should attach reflections to their catalog entries...
             self._votes.append(make_vote(ref))
 
@@ -132,7 +131,7 @@ class DremioClient(object):
                                    password=self._password)
             except NotImplementedError:
                 logging.warning("Unable to run query as odbc, downgrading to rest")
-        results = _rest_query(self._token, self._base_url, sql)
+        results = _rest_query(self._token, self._base_url, sql, ssl_verify=self._ssl_verify)
         if pandas:
             return pandas.DataFrame(results)
         return results
@@ -150,7 +149,7 @@ class DremioClient(object):
         :raise: DremioNotFoundException user could not be found
         :return: user info as a dict
         """
-        return user(self._token, self._base_url, uid, name)
+        return user(self._token, self._base_url, uid, name, ssl_verify=self._ssl_verify)
 
     def group(self, gid=None, name=None):
         """ return details for a group
@@ -165,7 +164,7 @@ class DremioClient(object):
         :raise: DremioNotFoundException group could not be found
         :return: group info as a dict
         """
-        return group(self._token, self._base_url, gid, name)
+        return group(self._token, self._base_url, gid, name, ssl_verify=self._ssl_verify)
 
     def personal_access_token(self, uid):
         """ return a list of personal access tokens for a user
@@ -178,4 +177,4 @@ class DremioClient(object):
         :raise: DremioNotFoundException user could not be found
         :return: personal access token list
         """
-        return personal_access_token(self._token, self._base_url, uid)
+        return personal_access_token(self._token, self._base_url, uid, ssl_verify=self._ssl_verify)

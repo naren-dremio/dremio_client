@@ -104,3 +104,5 @@ ENV/
 .idea
 
 dremio_client/cloner
+dremio_client/cloner_old
+cloner_test.py

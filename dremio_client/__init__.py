@@ -29,7 +29,7 @@ from __future__ import division
 
 __author__ = """Ryan Murray"""
 __email__ = 'rymurr@gmail.com'
-__version__ = '0.2.4'
+__version__ = '0.3.1'
 
 import os
 from .dremio_client import DremioClient
@@ -63,21 +63,13 @@ def init(config_dir=None, simple_client=False):
     >>> client = init('/my/config/dir')
     """
     config = get_config(config_dir)
-    return _connect(config['hostname'].get(),
-                    config['auth']['username'].get(),
-                    config['auth']['password'].get(),
-                    config['ssl'].get(bool),
-                    config['port'].get(int),
-                    config['flight']['port'].get(int),
-                    config['odbc']['port'].get(int),
-                    config['auth']['type'],
-                    simple_client)
+    return _connect(config, simple_client)
 
 
-def _connect(hostname, username, password, tls, port, flight_port, odbc_port, auth, simple):
+def _connect(config_dir, simple=False):
     if simple:
-        return SimpleClient(hostname, username, password, tls, port, auth)
-    return DremioClient(hostname, username, password, tls, port, flight_port, odbc_port, auth)
+        return SimpleClient(config_dir)
+    return DremioClient(config_dir)
 
 
 __all__ = ['init', 'catalog', 'catalog_item', 'sql', 'job_status', 'job_results']

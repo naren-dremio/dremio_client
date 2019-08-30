@@ -41,7 +41,7 @@ _job_states = {
 _done_job_states = {'COMPLETED', 'CANCELED', 'FAILED'}
 
 
-def run(token, base_url, query, context=None, sleep_time=10):
+def run(token, base_url, query, context=None, sleep_time=10, ssl_verify=True):
     """ Run a single sql query
 
     This runs a single sql query against the rest api and returns a json document of the results
@@ -51,6 +51,7 @@ def run(token, base_url, query, context=None, sleep_time=10):
     :param query: valid sql query
     :param context: optional context in which to execute the query
     :param sleep_time: seconds to sleep between checking for finished state
+    :param ssl_verify: verify ssl on web requests
     :raise: DremioException if job failed
     :raise: DremioUnauthorizedException if token is incorrect or invalid
     :return: json array of result rows
@@ -61,10 +62,10 @@ def run(token, base_url, query, context=None, sleep_time=10):
     [{'record':'1'}, {'record':'2'}]
     """
     assert sleep_time > 0
-    job = sql(token, base_url, query, context)
+    job = sql(token, base_url, query, context, ssl_verify=ssl_verify)
     job_id = job['id']
     while True:
-        state = job_status(token, base_url, job_id)
+        state = job_status(token, base_url, job_id, ssl_verify=ssl_verify)
         if state['jobState'] == 'COMPLETED':
             row_count = state.get('rowCount', 0)
             break
@@ -74,12 +75,12 @@ def run(token, base_url, query, context=None, sleep_time=10):
         time.sleep(sleep_time)
     count = 0
     while count < row_count:
-        result = job_results(token, base_url, job_id, count)
+        result = job_results(token, base_url, job_id, count, ssl_verify=ssl_verify)
         count += 100
         yield result
 
 
-def run_async(token, base_url, query, context=None, sleep_time=10):
+def run_async(token, base_url, query, context=None, sleep_time=10, ssl_verify=True):
     """ Run a single sql query asynchronously
 
     This executes a single sql query against the rest api asynchronously and returns a future for the result
@@ -89,6 +90,7 @@ def run_async(token, base_url, query, context=None, sleep_time=10):
     :param query: valid sql query
     :param context: optional context in which to execute the query
     :param sleep_time: seconds to sleep between checking for finished state
+    :param ssl_verify: verify ssl on web requests
     :raise: DremioException if job failed
     :raise: DremioUnauthorizedException if token is incorrect or invalid
     :return: concurrent.futures.Future for the result
@@ -99,10 +101,10 @@ def run_async(token, base_url, query, context=None, sleep_time=10):
     >>> f.result()
     [{'record':'1'}, {'record':'2'}]
     """
-    return executor.submit(run, token, base_url, query, context, sleep_time)
+    return executor.submit(run, token, base_url, query, context, sleep_time, ssl_verify)
 
 
-def refresh_metadata(token, base_url, table):
+def refresh_metadata(token, base_url, table, ssl_verify=True):
     """ Refresh the metadata of a given PDS
 
     This requests a metadata refresh of a given Physical Dataset
@@ -110,6 +112,7 @@ def refresh_metadata(token, base_url, table):
     :param token: API token from auth
     :param base_url: base url of Dremio instance
     :param table: valid dremio table name
+    :param ssl_verify: verify ssl on web requests
     :raise: DremioException if job failed
     :raise: DremioUnauthorizedException if token is incorrect or invalid
     :return: None
@@ -120,6 +123,6 @@ def refresh_metadata(token, base_url, table):
     """
     res = []
     for x in run(token, base_url,
-                 "ALTER PDS {} REFRESH METADATA FORCE UPDATE".format(table), sleep_time=2):
+                 "ALTER PDS {} REFRESH METADATA FORCE UPDATE".format(table), sleep_time=2, ssl_verify=ssl_verify):
         res.append(x)
     return res

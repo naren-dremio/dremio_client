@@ -22,9 +22,10 @@
 # under the License.
 #
 from .basic import login as _login
+from confuse import NotFoundError
 
 
-def login(base_url, config_dict, timeout=10):
+def login(base_url, config_dict):
     """
     Log into dremio using basic auth and looking for config
     :param base_url: Dremio url
@@ -38,4 +39,12 @@ def login(base_url, config_dict, timeout=10):
     password = config_dict['auth']['password'].get()
     if not password:
         raise RuntimeError("No password available, can't login")
-    return _login(base_url, username, password, timeout)
+    try:
+        timeout = config_dict['auth']['timeout'].get(int)
+    except NotFoundError:
+        timeout = 10
+    try:
+        verify = config_dict['verify'].get(bool)
+    except NotFoundError:
+        verify = 10
+    return _login(base_url, username, password, timeout, verify)

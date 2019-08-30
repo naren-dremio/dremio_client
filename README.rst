@@ -87,11 +87,11 @@ TODO
 ----
 
 * put, delete and post
-* refresh reflections
 * add reflections into catalog
 * test for larger spaces and ensure it doesnt fetch everytihgn if we hit directly
 * search
 * docs
 * logging
-* option to skip ssl verification
 * handle exceptions correctly in cli
+* osx & appveyor
+* testing
