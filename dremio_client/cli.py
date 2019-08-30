@@ -148,16 +148,16 @@ def catalog(args):
 @click.option('-i', '--id', help="Path of a given catalog item")
 @click.option('-p', '--path', help="id of a given catalog item")
 @click.pass_obj
-def catalog_item(args, id, path):
+def catalog_item(args, cid, path):
     """
     return the details of a given catalog item
 
-    if id and path are both specified id is used
+    if cid and path are both specified id is used
     if neither are specified it causes an error
 
     """
     base_url, token = get_base_url_token(args)
-    x = _catalog_item(token, base_url, id, [path.replace('.', '/')] if path else None)
+    x = _catalog_item(token, base_url, cid, [path.replace('.', '/')] if path else None)
     click.echo(json.dumps(x))
 
 

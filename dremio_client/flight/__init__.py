@@ -86,3 +86,4 @@ except ImportError:
 
     def query(*args, **kwargs):
         raise NotImplementedError("Python Flight bindings require Python 3 and pyarrow > 0.14.0")
+

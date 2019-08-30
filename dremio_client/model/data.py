@@ -226,6 +226,7 @@ class Catalog(dict):
         self._flight_endpoint = flight_endpoint
         self._ssl_verify = ssl_verify
         self._dirty = dirty
+        self.meta = None
 
         def try_id_and_path(x, y):
             try:
@@ -257,7 +258,7 @@ class Catalog(dict):
             if self.meta.entityType in {'source', 'home', 'space', 'folder', 'root', 'dataset'}:
                 result = self._catalog_item(self.meta.id if hasattr(self.meta, 'id') else None,
                                             self.meta.path if hasattr(self.meta, 'path') else None)
-                name, obj = create(result, self._token,
+                _, obj = create(result, self._token,
                                    self._base_url, self._flight_endpoint, ssl_verify=self._ssl_verify)
                 self.update(obj)
                 self.meta = self.meta._replace(**{k: v for k, v in obj.meta._asdict().items() if v})

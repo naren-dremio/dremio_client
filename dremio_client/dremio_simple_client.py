@@ -51,8 +51,8 @@ class SimpleClient(object):
     def job_status(self, jobid):
         return job_status(self._token, self._base_url, jobid, ssl_verify=self._ssl_verify)
 
-    def catalog_item(self, id, path):
-        return catalog_item(self._token, self._base_url, id, path, ssl_verify=self._ssl_verify)
+    def catalog_item(self, cid, path):
+        return catalog_item(self._token, self._base_url, cid, path, ssl_verify=self._ssl_verify)
 
     def job_results(self, jobid):
         return job_results(self._token, self._base_url, jobid, ssl_verify=self._ssl_verify)

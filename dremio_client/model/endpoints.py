@@ -80,7 +80,7 @@ def _check_error(r, details=''):
     raise DremioException('unknown error', error)
 
 
-def catalog_item(token, base_url, id=None, path=None, ssl_verify=True):
+def catalog_item(token, base_url, cid=None, path=None, ssl_verify=True):
     """fetch a specific catalog item by id or by path
 
     https://docs.dremio.com/rest-api/catalog/get-catalog-id.html
@@ -88,16 +88,16 @@ def catalog_item(token, base_url, id=None, path=None, ssl_verify=True):
 
     :param token: auth token from previous login attempt
     :param base_url: base Dremio url
-    :param id: unique dremio id for resource
+    :param cid: unique dremio id for resource
     :param path: path (/adls/nyctaxi/filename) for a resource
     :param ssl_verify: ignore ssl errors if False
     :return: json of resource
     """
-    if id is None and path is None:
+    if cid is None and path is None:
         raise TypeError(
             "both id and path can't be None for a catalog_item call")
-    idpath = (id if id else '') + ', ' + ('.'.join(path) if path else '')
-    endpoint = '/{}'.format(id) if id else '/by-path/{}'.format(
+    idpath = (cid if cid else '') + ', ' + ('.'.join(path) if path else '')
+    endpoint = '/{}'.format(cid) if cid else '/by-path/{}'.format(
         '/'.join(path).replace('"', ''))
     return _get(base_url + "/api/v3/catalog{}".format(endpoint), token, idpath, ssl_verify=ssl_verify)
 
