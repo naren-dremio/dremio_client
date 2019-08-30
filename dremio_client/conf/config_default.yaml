@@ -6,6 +6,7 @@ auth:
 hostname: localhost
 port: 9047
 ssl: false
+verify: true
 odbc:
     port: 31010
 flight:

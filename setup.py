@@ -42,7 +42,8 @@ requirements = [
     'protobuf',
     'requests-futures',
     'confuse',
-    'simplejson'
+    'simplejson',
+    'recordclass'
 ]
 
 setup_requirements = []

@@ -22,12 +22,13 @@
 # under the License.
 #
 
-from .command_pb2 import Command
-import pyarrow as pa
+
 
 try:
+    import pyarrow as pa
     from pyarrow import flight
     from .flight_auth import HttpDremioClientAuthHandler
+    from pyarrow.compat import tobytes
 
     def connect(hostname='localhost', port=47470,
                 username='dremio', password='dremio123'):
@@ -65,9 +66,7 @@ try:
         if not client:
             client = connect(hostname, port, username, password)
 
-        cmd = Command(query=sql, parallel=False, coalesce=False, ticket=b'')
-        info = client.get_flight_info(
-            flight.FlightDescriptor.for_command(cmd.SerializeToString()))
+        info = client.get_flight_info(flight.FlightDescriptor.for_command(tobytes(sql)))
         reader = client.do_get(info.endpoints[0].ticket)
         batches = []
         while True:
@@ -88,3 +87,4 @@ except ImportError:
 
     def query(*args, **kwargs):
         raise NotImplementedError("Python Flight bindings require Python 3 and pyarrow > 0.14.0")
+
