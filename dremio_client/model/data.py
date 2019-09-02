@@ -330,8 +330,9 @@ class Catalog(dict):
 def _put(self):
     cid = self.meta.id
     result = update_catalog(self._token, self._base_url, cid, self.meta._asdict(), self._ssl_verify)
-    name, obj = create(result, self._token,
-                       self._base_url, self._flight_endpoint, ssl_verify=self._ssl_verify)
+
+    _, obj = create(result, self._token,
+                    self._base_url, self._flight_endpoint, ssl_verify=self._ssl_verify)
     return obj.meta
 
 
@@ -341,8 +342,8 @@ def _post(self):
         if i in json:
             del json[i]
     result = set_catalog(self._token, self._base_url, json, self._ssl_verify)
-    name, obj = create(result, self._token,
-                       self._base_url, self._flight_endpoint, ssl_verify=self._ssl_verify)
+    _, obj = create(result, self._token,
+                    self._base_url, self._flight_endpoint, ssl_verify=self._ssl_verify)
     return obj.meta
 
 
@@ -359,13 +360,13 @@ class Root(Catalog):
 
     def add_by_path(self, item, new_entity=True):
         if new_entity:
-            id = item.pop('id')
+            cid = item.pop('id')
             tag = item.pop('tag')
         name, obj = create(item, self._token, self._base_url,
                            self._flight_endpoint, ssl_verify=self._ssl_verify, dirty=True)
         if new_entity:
-            item['id'] = id
-            item['tag'] = tag
+            item['id'] = cid  # NOQA
+            item['tag'] = tag  # NOQA
         base = self
         subpath = list()
         for p in obj.meta.path[:-1]:
