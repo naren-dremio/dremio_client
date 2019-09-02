@@ -24,7 +24,8 @@
 #
 from .auth import auth
 from .model.endpoints import catalog, job_results, job_status, sql, catalog_item, reflections, reflection, wlm_queues, \
-    wlm_rules, votes, user, group, personal_access_token, collaboration_tags, collaboration_wiki
+    wlm_rules, votes, user, group, personal_access_token, collaboration_tags, collaboration_wiki, update_catalog, \
+    delete_catalog, set_catalog, refresh_pds
 from .util import run, run_async, refresh_metadata
 
 
@@ -209,3 +210,46 @@ class SimpleClient(object):
         :return: None
         """
         return refresh_metadata(self._token, self._base_url, table, ssl_verify=self._ssl_verify)
+
+    def update_catalog(self, cid, json):
+
+        """ update a catalog entity
+
+        https://docs.dremio.com/rest-api/catalog/put-catalog-id.html
+
+        :param cid: id of catalog entity
+        :param json: json document for new catalog entity
+        :return: updated catalog entity
+        """
+        return update_catalog(self._token, self._base_url, cid, json, ssl_verify=self._ssl_verify)
+
+    def delete_catalog(self, cid, tag):
+        """ remove a catalog item from Dremio
+
+        https://docs.dremio.com/rest-api/catalog/delete-catalog-id.html
+
+        :param cid: id of a catalog entity
+        :param tag: version tag of entity
+        :return: None
+        """
+        return delete_catalog(self._token, self._base_url, cid, tag, ssl_verify=self._ssl_verify)
+
+    def set_catalog(self, json):
+        """ add a new catalog entity
+
+        https://docs.dremio.com/rest-api/catalog/post-catalog.html
+
+        :param json: json document for new catalog entity
+        :return: new catalog entity
+        """
+        return set_catalog(self._token, self._base_url, json, ssl_verify=self._ssl_verify)
+
+    def refresh_pds(self, pid):
+        """ refresh a physical dataset and all its child reflections
+
+        https://docs.dremio.com/rest-api/catalog/post-catalog-id-refresh.html
+
+        :param pid: id of a catalog entity
+        :return: None
+        """
+        return refresh_pds(self._token, self._base_url, pid, ssl_verify=self._ssl_verify)
