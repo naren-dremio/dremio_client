@@ -51,6 +51,9 @@ from .model.endpoints import set_catalog as _set_catalog
 from .model.endpoints import delete_catalog as _delete_catalog
 from .model.endpoints import update_catalog as _update_catalog
 from .model.endpoints import refresh_pds as _refresh_pds
+from .model.endpoints import delete_personal_access_token as _delete_personal_access_token
+from .model.endpoints import set_personal_access_token as _set_personal_access_token
+
 
 @click.group()
 @click.option('--config', type=click.Path(exists=True, dir_okay=True, file_okay=False),
@@ -392,13 +395,41 @@ def set_catalog(args, data):
 @cli.command()
 @click.argument('pid', nargs=1, required=True)
 @click.pass_obj
-def refresh_pds(args, uid):
+def refresh_pds(args, pid):
     """
     refresh metadata/reflections for a given physical dataset
 
     """
     base_url, token = get_base_url_token(args)
-    x = _refresh_pds(token, base_url, uid, ssl_verify=args['ssl_verify'])
+    x = _refresh_pds(token, base_url, pid, ssl_verify=args['ssl_verify'])
+    click.echo(json.dumps(x))
+
+
+@cli.command()
+@click.argument('uid', nargs=1, required=True)
+@click.option('-l', '--lifetime',  help='lifetime of token in hours', default=24, type=int)
+@click.option('-n', '--name',  help='name of token')
+@click.pass_obj
+def set_pat(args, uid, lifetime, name):
+    """
+    create a personal access token
+
+    """
+    base_url, token = get_base_url_token(args)
+    x = _set_personal_access_token(token, base_url, uid, name, lifetime, ssl_verify=args['ssl_verify'])
+    click.echo(json.dumps(x))
+
+
+@cli.command()
+@click.argument('uid', nargs=1, required=True)
+@click.pass_obj
+def delete_pat(args, uid):
+    """
+    delete a personal access token
+
+    """
+    base_url, token = get_base_url_token(args)
+    x = _delete_personal_access_token(token, base_url, uid, ssl_verify=args['ssl_verify'])
     click.echo(json.dumps(x))
 
 

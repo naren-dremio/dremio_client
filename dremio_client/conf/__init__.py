@@ -31,5 +31,5 @@ import yaml
 def to_dict(config):
     ys = config.dump(redact=True)
     fd = StringIO(ys)
-    dct = yaml.load(fd)
+    dct = yaml.safe_load(fd)
     return dct

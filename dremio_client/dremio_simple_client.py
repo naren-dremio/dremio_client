@@ -25,7 +25,7 @@
 from .auth import auth
 from .model.endpoints import catalog, job_results, job_status, sql, catalog_item, reflections, reflection, wlm_queues, \
     wlm_rules, votes, user, group, personal_access_token, collaboration_tags, collaboration_wiki, update_catalog, \
-    delete_catalog, set_catalog, refresh_pds
+    delete_catalog, set_catalog, refresh_pds, set_personal_access_token, delete_personal_access_token
 from .util import run, run_async, refresh_metadata
 
 
@@ -212,7 +212,6 @@ class SimpleClient(object):
         return refresh_metadata(self._token, self._base_url, table, ssl_verify=self._ssl_verify)
 
     def update_catalog(self, cid, json):
-
         """ update a catalog entity
 
         https://docs.dremio.com/rest-api/catalog/put-catalog-id.html
@@ -253,3 +252,25 @@ class SimpleClient(object):
         :return: None
         """
         return refresh_pds(self._token, self._base_url, pid, ssl_verify=self._ssl_verify)
+
+    def set_personal_access_token(self, uid, label, lifetime=24):
+        """ create a pat for a given user
+
+        https://docs.dremio.com/rest-api/user/post-user-uid-token.html
+
+        :param uid: id user
+        :param label: label of token
+        :param lifetime: lifetime in hours of token
+        :return: updated catalog entity
+        """
+        return set_personal_access_token(self._token, self._base_url, uid, label, lifetime, ssl_verify=self._ssl_verify)
+
+    def delete_personal_access_token(self, uid):
+        """ create a pat for a given user
+
+        https://docs.dremio.com/rest-api/user/delete-user-uid-token.html
+
+        :param uid: id user
+        :return: updated catalog entity
+        """
+        return delete_personal_access_token(self._token, self._base_url, uid, ssl_verify=self._ssl_verify)

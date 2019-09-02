@@ -237,7 +237,7 @@ def votes(token, base_url, ssl_verify=True):
 
 def user(token, base_url, uid=None, name=None, ssl_verify=True):
     """
-    fetch all votes
+    fetch user based on id or name
     https://docs.dremio.com/rest-api/reflections/get-user.html
 
     :param token: auth token
@@ -419,6 +419,39 @@ def update_catalog(token, base_url, cid, json, ssl_verify=True):
     :return: updated catalog entity
     """
     return _post(base_url + "/api/v3/catalog/{}".format(cid), token, json, ssl_verify=ssl_verify)
+
+
+def set_personal_access_token(token, base_url, uid, label, lifetime=24, ssl_verify=True):
+    """ create a pat for a given user
+
+    https://docs.dremio.com/rest-api/user/post-user-uid-token.html
+
+    :param token: auth token
+    :param base_url: sql query
+    :param uid: id user
+    :param label: label of token
+    :param lifetime: lifetime in hours of token
+    :param ssl_verify: ignore ssl errors if False
+    :return: updated catalog entity
+    """
+    return _post(base_url + "/api/v3/user/{}/token".format(uid), token,
+                 {'label': label, 'lifeTime': 1000 * 60 * 60 * lifetime}, ssl_verify=ssl_verify)
+
+
+def delete_personal_access_token(token, base_url, uid, tid=None, ssl_verify=True):
+    """ create a pat for a given user
+
+    https://docs.dremio.com/rest-api/user/delete-user-uid-token.html
+
+    :param token: auth token
+    :param base_url: sql query
+    :param uid: id user
+    :param tid: label of token (optional)
+    :param ssl_verify: ignore ssl errors if False
+    :return: updated catalog entity
+    """
+    return _delete(base_url + "/api/v3/user/{}/token{}".format(uid, ('/' + tid) if tid else ''), token,
+                   ssl_verify=ssl_verify)
 
 
 def _raise_for_status(self):
