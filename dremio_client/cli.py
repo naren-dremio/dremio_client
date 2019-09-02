@@ -94,7 +94,7 @@ def query(args, sql):
     """
     base_url, token = get_base_url_token(args)
     results = list()
-    for x in run(token, base_url, sql, ssl_verify=args['ssl_verify']):
+    for x in run(token, base_url, sql, ssl_verify=args.get('ssl_verify', True)):
         results.extend(x['rows'])
     click.echo(json.dumps(results))
 
@@ -109,7 +109,7 @@ def sql(args, sql_query, context):
 
     """
     base_url, token = get_base_url_token(args)
-    x = _sql(token, base_url, ' '.join(sql_query), context, ssl_verify=args['ssl_verify'])
+    x = _sql(token, base_url, ' '.join(sql_query), context, ssl_verify=args.get('ssl_verify', True))
     click.echo(json.dumps(x))
 
 
@@ -122,7 +122,7 @@ def job_status(args, jobid):
 
     """
     base_url, token = get_base_url_token(args)
-    x = _job_status(token, base_url, jobid, ssl_verify=args['ssl_verify'])
+    x = _job_status(token, base_url, jobid, ssl_verify=args.get('ssl_verify', True))
     click.echo(json.dumps(x))
 
 
@@ -139,7 +139,7 @@ def job_results(args, jobid, offset, limit):
 
     """
     base_url, token = get_base_url_token(args)
-    x = _job_results(token, base_url, jobid, offset, limit, ssl_verify=args['ssl_verify'])
+    x = _job_results(token, base_url, jobid, offset, limit, ssl_verify=args.get('ssl_verify', True))
     click.echo(json.dumps(x))
 
 
@@ -151,7 +151,7 @@ def catalog(args):
 
     """
     base_url, token = get_base_url_token(args)
-    x = _catalog(token, base_url, ssl_verify=args['ssl_verify'])
+    x = _catalog(token, base_url, ssl_verify=args.get('ssl_verify', True))
     click.echo(json.dumps(x))
 
 
@@ -168,7 +168,7 @@ def catalog_item(args, cid, path):
 
     """
     base_url, token = get_base_url_token(args)
-    x = _catalog_item(token, base_url, cid, [path.replace('.', '/')] if path else None, ssl_verify=args['ssl_verify'])
+    x = _catalog_item(token, base_url, cid, [path.replace('.', '/')] if path else None, ssl_verify=args.get('ssl_verify', True))
     click.echo(json.dumps(x))
 
 
@@ -181,7 +181,7 @@ def reflections(args, summary):
 
     """
     base_url, token = get_base_url_token(args)
-    x = _reflections(token, base_url, summary, ssl_verify=args['ssl_verify'])
+    x = _reflections(token, base_url, summary, ssl_verify=args.get('ssl_verify', True))
     click.echo(json.dumps(x))
 
 
@@ -194,7 +194,7 @@ def reflection(args, reflectionid):
 
     """
     base_url, token = get_base_url_token(args)
-    x = _reflection(token, base_url, reflectionid, ssl_verify=args['ssl_verify'])
+    x = _reflection(token, base_url, reflectionid, ssl_verify=args.get('ssl_verify', True))
     click.echo(json.dumps(x))
 
 
@@ -206,7 +206,7 @@ def wlm_rules(args):
 
     """
     base_url, token = get_base_url_token(args)
-    x = _wlm_rules(token, base_url, ssl_verify=args['ssl_verify'])
+    x = _wlm_rules(token, base_url, ssl_verify=args.get('ssl_verify', True))
     click.echo(json.dumps(x))
 
 
@@ -218,7 +218,7 @@ def wlm_queues(args):
 
     """
     base_url, token = get_base_url_token(args)
-    x = _wlm_queues(token, base_url, ssl_verify=args['ssl_verify'])
+    x = _wlm_queues(token, base_url, ssl_verify=args.get('ssl_verify', True))
     click.echo(json.dumps(x))
 
 
@@ -230,7 +230,7 @@ def votes(args):
 
     """
     base_url, token = get_base_url_token(args)
-    x = _votes(token, base_url, ssl_verify=args['ssl_verify'])
+    x = _votes(token, base_url, ssl_verify=args.get('ssl_verify', True))
     click.echo(json.dumps(x))
 
 
@@ -244,7 +244,7 @@ def user(args, gid, name):
 
     """
     base_url, token = get_base_url_token(args)
-    x = _user(token, base_url, gid, name, ssl_verify=args['ssl_verify'])
+    x = _user(token, base_url, gid, name, ssl_verify=args.get('ssl_verify', True))
     click.echo(json.dumps(x))
 
 
@@ -258,7 +258,7 @@ def group(args, gid, name):
 
     """
     base_url, token = get_base_url_token(args)
-    x = _group(token, base_url, gid, name, ssl_verify=args['ssl_verify'])
+    x = _group(token, base_url, gid, name, ssl_verify=args.get('ssl_verify', True))
     click.echo(json.dumps(x))
 
 
@@ -271,7 +271,7 @@ def pat(args, uid):
 
     """
     base_url, token = get_base_url_token(args)
-    x = _pat(token, base_url, uid, ssl_verify=args['ssl_verify'])
+    x = _pat(token, base_url, uid, ssl_verify=args.get('ssl_verify', True))
     click.echo(json.dumps(x))
 
 
@@ -287,10 +287,10 @@ def tags(args, cid, path):
     """
     base_url, token = get_base_url_token(args)
     if path:
-        res = _catalog_item(token, base_url, None, [path.replace('.', '/')], ssl_verify=args['ssl_verify'])
+        res = _catalog_item(token, base_url, None, [path.replace('.', '/')], ssl_verify=args.get('ssl_verify', True))
         cid = res['id']
     try:
-        x = _collaboration_tags(token, base_url, cid, ssl_verify=args['ssl_verify'])
+        x = _collaboration_tags(token, base_url, cid, ssl_verify=args.get('ssl_verify', True))
         click.echo(json.dumps(x))
     except DremioNotFoundException:
         click.echo("Wiki not found or entity does not exist")
@@ -311,10 +311,10 @@ def wiki(args, cid, path, pretty_print):
     """
     base_url, token = get_base_url_token(args)
     if path:
-        res = _catalog_item(token, base_url, None, [path.replace('.', '/')], ssl_verify=args['ssl_verify'])
+        res = _catalog_item(token, base_url, None, [path.replace('.', '/')], ssl_verify=args.get('ssl_verify', True))
         cid = res['id']
     try:
-        x = _collaboration_wiki(token, base_url, cid, ssl_verify=args['ssl_verify'])
+        x = _collaboration_wiki(token, base_url, cid, ssl_verify=args.get('ssl_verify', True))
         if pretty_print:
             try:
                 text = _to_text(x['text'])
@@ -361,7 +361,7 @@ def update_catalog(args, data, cid):
 
     """
     base_url, token = get_base_url_token(args)
-    x = _update_catalog(token, base_url, cid, data, ssl_verify=args['ssl_verify'])
+    x = _update_catalog(token, base_url, cid, data, ssl_verify=args.get('ssl_verify', True))
     click.echo(json.dumps(x))
 
 
@@ -375,7 +375,7 @@ def delete_catalog(args, cid, tag):
 
     """
     base_url, token = get_base_url_token(args)
-    x = _delete_catalog(token, base_url, cid, tag, ssl_verify=args['ssl_verify'])
+    x = _delete_catalog(token, base_url, cid, tag, ssl_verify=args.get('ssl_verify', True))
     click.echo(json.dumps(x))
 
 
@@ -388,7 +388,7 @@ def set_catalog(args, data):
 
     """
     base_url, token = get_base_url_token(args)
-    x = _set_catalog(token, base_url, data, ssl_verify=args['ssl_verify'])
+    x = _set_catalog(token, base_url, data, ssl_verify=args.get('ssl_verify', True))
     click.echo(json.dumps(x))
 
 
@@ -401,7 +401,7 @@ def refresh_pds(args, pid):
 
     """
     base_url, token = get_base_url_token(args)
-    x = _refresh_pds(token, base_url, pid, ssl_verify=args['ssl_verify'])
+    x = _refresh_pds(token, base_url, pid, ssl_verify=args.get('ssl_verify', True))
     click.echo(json.dumps(x))
 
 
@@ -416,7 +416,7 @@ def set_pat(args, uid, lifetime, name):
 
     """
     base_url, token = get_base_url_token(args)
-    x = _set_personal_access_token(token, base_url, uid, name, lifetime, ssl_verify=args['ssl_verify'])
+    x = _set_personal_access_token(token, base_url, uid, name, lifetime, ssl_verify=args.get('ssl_verify', True))
     click.echo(json.dumps(x))
 
 
@@ -429,7 +429,7 @@ def delete_pat(args, uid):
 
     """
     base_url, token = get_base_url_token(args)
-    x = _delete_personal_access_token(token, base_url, uid, ssl_verify=args['ssl_verify'])
+    x = _delete_personal_access_token(token, base_url, uid, ssl_verify=args.get('ssl_verify', True))
     click.echo(json.dumps(x))
 
 
