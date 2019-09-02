@@ -168,7 +168,8 @@ def catalog_item(args, cid, path):
 
     """
     base_url, token = get_base_url_token(args)
-    x = _catalog_item(token, base_url, cid, [path.replace('.', '/')] if path else None, ssl_verify=args.get('ssl_verify', True))
+    x = _catalog_item(token, base_url, cid, [path.replace('.', '/')] if path else None,
+                      ssl_verify=args.get('ssl_verify', True))
     click.echo(json.dumps(x))
 
 
@@ -353,7 +354,7 @@ def _to_text(text):
 
 @cli.command()
 @click.argument('data', nargs=1, required=True)
-@click.option('-i', '--cid',  help='catalog endity')
+@click.option('-i', '--cid', help='catalog endity')
 @click.pass_obj
 def update_catalog(args, data, cid):
     """
@@ -367,7 +368,7 @@ def update_catalog(args, data, cid):
 
 @cli.command()
 @click.argument('cid', nargs=1, required=True)
-@click.option('-t', '--tag',  help='current tag, for concurrency')
+@click.option('-t', '--tag', help='current tag, for concurrency')
 @click.pass_obj
 def delete_catalog(args, cid, tag):
     """
@@ -407,8 +408,8 @@ def refresh_pds(args, pid):
 
 @cli.command()
 @click.argument('uid', nargs=1, required=True)
-@click.option('-l', '--lifetime',  help='lifetime of token in hours', default=24, type=int)
-@click.option('-n', '--name',  help='name of token')
+@click.option('-l', '--lifetime', help='lifetime of token in hours', default=24, type=int)
+@click.option('-n', '--name', help='name of token')
 @click.pass_obj
 def set_pat(args, uid, lifetime, name):
     """
