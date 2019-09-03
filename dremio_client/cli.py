@@ -156,7 +156,7 @@ def catalog(args):
 
 
 @cli.command()
-@click.option('-i', '--id', help="Path of a given catalog item")
+@click.option('-c', '--cid', help="Path of a given catalog item")
 @click.option('-p', '--path', help="id of a given catalog item")
 @click.pass_obj
 def catalog_item(args, cid, path):
