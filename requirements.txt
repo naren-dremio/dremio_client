@@ -1,4 +1,4 @@
-pyarrow>=0.14.0
+pyarrow>=0.15.0
 pandas==0.25.1
 Click>=6.0
 requests>=2.21.0

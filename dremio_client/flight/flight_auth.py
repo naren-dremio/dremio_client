@@ -21,21 +21,19 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-from pyarrow.flight import ClientAuthHandler
-from pyarrow.compat import tobytes
-import base64
+from pyarrow.flight import ClientAuthHandler, BasicAuth
 
 
 class HttpDremioClientAuthHandler(ClientAuthHandler):
 
     def __init__(self, username, password):
-        ClientAuthHandler.__init__(self)
-        self.username = tobytes(username)
-        self.password = tobytes(password)
+        super(ClientAuthHandler, self).__init__()
+        self.basic_auth = BasicAuth(username, password)
         self.token = None
 
     def authenticate(self, outgoing, incoming):
-        outgoing.write(base64.b64encode(self.username + b':' + self.password))
+        auth = self.basic_auth.serialize()
+        outgoing.write(auth)
         self.token = incoming.read()
 
     def get_token(self):

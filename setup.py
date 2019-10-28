@@ -35,7 +35,7 @@ with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
 requirements = [
-    'pyarrow>=0.14.0',
+    'pyarrow>=0.15.0',
     'pandas',
     'Click>=6.0',
     'requests>=2.21.0',
