@@ -30,7 +30,7 @@ try:
     from pyarrow.compat import tobytes
 
     def connect(hostname='localhost', port=47470,
-                username='dremio', password='dremio123'):
+                username='dremio', password='dremio123', tls_root_certs_filename=None):
         """
         Connect to and authenticate against Dremio's arrow flight server. Auth is skipped if username is None
 
@@ -38,16 +38,24 @@ try:
         :param port: Dremio coordinator port
         :param username: Username on Dremio
         :param password: Password on Dremio
+        :param tls_root_certs_filename: use ssl to connect with root certs from filename
         :return: arrow flight client
         """
-        c = flight.FlightClient.connect('grpc+tcp://{}:{}'.format(hostname, port))
+        if tls_root_certs_filename:
+            with open(tls_root_certs_filename) as f:
+                tls_root_certs = f.read()
+            location = 'grpc+tls://{}:{}'.format(hostname, port)
+            c = flight.FlightClient(location, tls_root_certs=tls_root_certs)
+        else:
+            location = 'grpc+tcp://{}:{}'.format(hostname, port)
+            c = flight.FlightClient(location)
         if username:
             c.authenticate(HttpDremioClientAuthHandler(
                 username, password if password else ''))
         return c
 
     def query(sql, client=None, hostname='localhost', port=47470,
-              username='dremio', password='dremio123', pandas=True):
+              username='dremio', password='dremio123', pandas=True, tls_root_certs_filename=False):
         """
         Run an sql query against Dremio and return a pandas dataframe or arrow table
 
@@ -60,10 +68,11 @@ try:
         :param username: Username on Dremio (optional)
         :param password: Password on Dremio (optional)
         :param pandas: return a pandas dataframe (default) or an arrow table
+        :param tls_root_certs_filename: use ssl to connect with root certs from filename
         :return:
         """
         if not client:
-            client = connect(hostname, port, username, password)
+            client = connect(hostname, port, username, password, tls_root_certs_filename)
 
         info = client.get_flight_info(flight.FlightDescriptor.for_command(tobytes(sql)))
         reader = client.do_get(info.endpoints[0].ticket)
