@@ -16,3 +16,10 @@ History
 ------------------
 
 * Beta quality release for GET based endpoints
+
+0.5.0 (2019-10-30)
+------------------
+
+* Most endpoint supported
+* flight support with tls & auth
+* minor bugfixes
